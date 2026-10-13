@@ -1,11 +1,11 @@
 import unittest
 from unittest.mock import AsyncMock, patch
 
-from app.enums.prompt_code import PromptCode
-from app.services.contract.legal_contract_analysis_service import (
+from backend.app.modules.configuration.enums.prompt_code import PromptCode
+from backend.app.modules.contract.services.legal_contract_analysis_service import (
     LegalContractAnalysisService,
 )
-from app.services.contract.legal_chat_retrieval_service import (
+from backend.app.modules.contract.services.legal_chat_retrieval_service import (
     LegalChatRetrievalService,
 )
 

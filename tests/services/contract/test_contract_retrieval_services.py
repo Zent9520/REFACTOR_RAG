@@ -9,16 +9,16 @@ from unittest.mock import patch
 import duckdb
 
 from app.core.settings import settings
-from app.services.azure.azure_search_service import (
+from backend.app.shared.azure.azure_search_service import (
     AzureSearchService,
 )
-from app.services.contract.company_policy_retrieval_service import (
+from backend.app.modules.contract.services.company_policy_retrieval_service import (
     CompanyPolicyRetrievalService,
 )
-from app.services.contract.legal_retrieval_service import (
+from backend.app.modules.contract.services.legal_retrieval_service import (
     LegalRetrievalService,
 )
-from scripts.setup_legal_fts import (
+from backend.app.modules.contract.scripts.setup_legal_fts import (
     build_fts_index,
     populate_legal_search,
 )

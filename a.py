@@ -1,12 +1,12 @@
-from app.repositories.azure_chunk_repository import (
+from app.modules.documents.repositories.azure_chunk_repository import (
     AzureChunkRepository
 )
 
-from app.services.knowledge.entity_extractor import (
+from backend.app.modules.knowledge_graph.services.entity_extractor import (
     EntityExtractor
 )
 
-from app.services.knowledge.graph_builder_service import (
+from backend.app.modules.knowledge_graph.services.graph_builder_service import (
     GraphBuilderService
 )
 import json

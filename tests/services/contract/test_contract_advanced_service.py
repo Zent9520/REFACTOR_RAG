@@ -2,11 +2,11 @@ import json
 import unittest
 from unittest.mock import AsyncMock, patch
 
-from app.enums.prompt_code import PromptCode
-from app.services.contract.contract_advanced_service import (
+from backend.app.modules.configuration.enums.prompt_code import PromptCode
+from backend.app.modules.contract.services.contract_advanced_service import (
     ContractAdvancedService,
 )
-from app.services.llm.azure_openai_service import (
+from backend.app.shared.llm.azure_openai_service import (
     LLMResponseTruncatedError,
 )
 

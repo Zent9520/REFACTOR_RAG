@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import AsyncMock, patch
 
-from app.enums.prompt_code import PromptCode
-from app.services.contract.legal_chat_service import LegalChatService
+from backend.app.modules.configuration.enums.prompt_code import PromptCode
+from backend.app.modules.contract.services.legal_chat_service import LegalChatService
 
 
 class LegalChatServiceTest(unittest.IsolatedAsyncioTestCase):

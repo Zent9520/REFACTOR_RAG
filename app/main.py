@@ -1,88 +1,88 @@
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-
+import backend.app.models_registry
 import asyncio
 
-from app.workers.sharepoint_delta_worker import (
+from backend.app.modules.documents.sharepoint_delta_worker import (
     sharepoint_delta_worker,
 )
-from app.workers.meeting_analysis_worker import (
+from backend.app.modules.meeting.meeting_analysis_worker import (
     MeetingAnalysisWorker,
 )
 
-from app.api.endpoints_v1.identity_access.role_router import router as role_router
-from app.api.endpoints_v1.identity_access.tag_router import router as tag_router
+from backend.app.modules.identity_access.routers.role_router import router as role_router
+from backend.app.modules.identity_access.routers.tag_router import router as tag_router
 
-from app.api.endpoints_v1.identity_access.tag_role_rule_router import (
+from backend.app.modules.identity_access.routers.tag_role_rule_router import (
     router as tag_role_rule_router
 )
-from app.api.endpoints_v1.identity_access.policy_router import (
+from backend.app.modules.identity_access.routers.policy_router import (
     router as policy_router
 )
-from app.api.endpoints_v1.documents.chunk_router import (
+from backend.app.modules.documents.routers.chunk_router import (
     router as chunk_router
 )
 
-from app.api.endpoints_v1.chat.chat_router import (
+from backend.app.modules.chat.routers.chat_router import (
     router as chat_router
 )
 
-from app.api.endpoints_v1.identity_access.permission_router import (
+from backend.app.modules.identity_access.routers.permission_router import (
     router as permission_router
 )
-from app.api.endpoints_v1.chat.bot_router import (
+from backend.app.modules.team_bot.bot_router import (
 
     router as bot_router
 
 )
-from app.api.endpoints_v1.chat.conversation_router import (
+from backend.app.modules.chat.routers.conversation_router import (
     router as conversation
 )
-from app.api.endpoints_v1.documents.document_router import (
+from backend.app.modules.documents.routers.document_router import (
     router as document_router
 )
-from app.api.endpoints_v1.knowledge_graph.graph_router import (
+from backend.app.modules.knowledge_graph.routers.graph_router import (
     router as graph_router
 )
-from app.api.endpoints_v1.chat.graph_chat_router import (
+from backend.app.modules.knowledge_graph.routers.graph_chat_router import (
     router as graph_chat_router
 )
-from app.api.endpoints_v1.recruitment.recruitment_candidate_router import (
+from backend.app.modules.recruitment.routers.recruitment_candidate_router import (
     router as recruitment_candidate_router
 )  
 
-from app.api.endpoints_v1.configuration.model_router import (
+from backend.app.modules.configuration.routers.model_router import (
     router as model_router
 ) 
 
-from app.api.endpoints_v1.identity_access.auth_router import (
+from backend.app.modules.identity_access.routers.auth_router import (
     router as auth_router
 )
 
-from app.api.endpoints_v1.planning.planner_router import (
+from backend.app.modules.planning.planner_router import (
     router as planner_router
 )
-from app.api.endpoints_v1.configuration.prompt_router import (
+from backend.app.modules.configuration.routers.prompt_router import (
     router as prompt_router
 )
 
-from app.api.endpoints_v1.contract.contract_router import (
+from backend.app.modules.contract.routers.contract_router import (
     router as contract_router)
 
-from app.workers.project_tracking_worker import (
+from backend.app.modules.project_tracking.project_tracking_worker import (
     ProjectTrackingWorker,
 )
 
-from app.api.endpoints_v1.configuration.workspace_source_config_router import (
+from backend.app.modules.documents.routers.workspace_source_config_router import (
     router as workspace_source_config_router,
 )
 
-from app.api.endpoints_v1.configuration.rag_config_router import (
+from backend.app.modules.configuration.routers.rag_config_router import (
     router as rag_config_router,
 )
 
-from app.api.endpoints_v1.meeting.meeting_router import (
+from backend.app.modules.meeting.routers.meeting_router import (
     router as meeting_router,
 )
 
@@ -94,8 +94,8 @@ from fastapi.middleware.cors import (
 
 
 
-from app.startup.queue_consumer import start_queue_consumers
-from app.workers.executive_data_worker import ExecutiveDataWorker
+from backend.app.shared.queue.queue_consumer import start_queue_consumers
+from backend.app.modules.executive_data.executive_data_worker import ExecutiveDataWorker
 
 
 

@@ -6,7 +6,7 @@ from sqlalchemy import (
 )
 from backend.app.modules.chat.enums.memories import MemoryType
 
-from app.core.database import Base
+from backend.app.core.database import Base
 from sqlalchemy.orm import Mapped, mapped_column
 
 class UserMemory(Base):

@@ -1,9 +1,9 @@
 import asyncio
 
-from app.core.database import AsyncSessionLocal
-from app.services.delta.delta_service import DeltaService
-from app.services.sharepoint.sharepoint_service import SharePointService
-from app.services.sharepoint.sharepoint_sync_service import (
+from backend.app.core.database import AsyncSessionLocal
+from backend.app.modules.documents.services.delta_service import DeltaService
+from backend.app.modules.documents.services.sharepoint_service import SharePointService
+from backend.app.modules.documents.services.sharepoint_sync_service import (
     SharePointSyncService,
 )
 

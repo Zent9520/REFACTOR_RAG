@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import duckdb
 
-from app.core.settings import settings
+from backend.app.core.settings import settings
 from backend.app.shared.azure.azure_search_service import (
     AzureSearchService,
 )

@@ -9,18 +9,18 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 
-from backend.app.models.recruitment.recruitment_campaign import (
+from backend.app.modules.recruitment.models.recruitment_campaign import (
     RecruitmentCampaign
 )
 
 
 
 
-from backend.app.models.recruitment.review_job import (
+from backend.app.modules.recruitment.models.review_job import (
     ReviewJob,
 )
 
-from backend.app.models.recruitment.review_task import (
+from backend.app.modules.recruitment.models.review_task import (
     ReviewTask,
 )
 

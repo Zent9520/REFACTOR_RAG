@@ -18,9 +18,9 @@ from sqlalchemy.orm import relationship
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from backend.app.models.recruitment.review_job import ReviewJob
+    from backend.app.modules.recruitment.models.review_job import ReviewJob
 
-from app.core.database import Base
+from backend.app.core.database import Base
 
 
 class ReviewTask(Base):

@@ -4,7 +4,7 @@ from fastapi import Query
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
+from backend.app.core.database import get_db
 
 from backend.app.modules.identity_access.schemas.auth import LoginResponse
 

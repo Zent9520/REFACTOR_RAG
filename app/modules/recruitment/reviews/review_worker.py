@@ -1,14 +1,14 @@
 import asyncio
 from datetime import datetime, timezone
 
-from app.core.database import AsyncSessionLocal
+from backend.app.core.database import AsyncSessionLocal
 from backend.app.modules.recruitment.enums.review_job_status import ReviewJobStatus
 from backend.app.modules.recruitment.enums.review_queue import ReviewQueue
 from backend.app.modules.recruitment.enums.review_task_status import ReviewTaskStatus
-from app.modules.recruitment.repositories.review_job_repository import ReviewJobRepository
-from app.modules.recruitment.repositories.review_task_repository import ReviewTaskRepository
+from backend.app.modules.recruitment.repositories.review_job_repository import ReviewJobRepository
+from backend.app.modules.recruitment.repositories.review_task_repository import ReviewTaskRepository
 from backend.app.modules.recruitment.services.review_ai_service import ReviewAIService
-from app.shared.queue.local_queue_provider import queue_provider
+from backend.app.shared.queue.local_queue_provider import queue_provider
 from backend.app.modules.recruitment.reviews.review_task_message import ReviewTaskMessage
 
 

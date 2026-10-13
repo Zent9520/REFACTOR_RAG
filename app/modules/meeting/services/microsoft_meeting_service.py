@@ -6,7 +6,7 @@ from urllib.parse import quote
 
 import httpx
 
-from app.core.settings import settings
+from backend.app.core.settings import settings
 
 
 class MicrosoftMeetingService:

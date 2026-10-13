@@ -4,7 +4,7 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.not_found_exception import (
+from backend.app.core.not_found_exception import (
     NotFoundException,
 )
 

@@ -1,6 +1,6 @@
 import httpx
 
-from app.core.settings import settings
+from backend.app.core.settings import settings
 from backend.app.modules.documents.services.sync_state import SyncState
 
 

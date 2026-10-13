@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import (
 from uuid import UUID
 
 
-from app.core.database import (
+from backend.app.core.database import (
 
  get_db
 

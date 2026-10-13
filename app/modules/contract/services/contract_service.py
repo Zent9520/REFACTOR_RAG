@@ -31,7 +31,7 @@ from datetime import datetime, timezone
 
 from uuid import UUID
 
-from app.core.settings import (
+from backend.app.core.settings import (
     settings,)
 
 

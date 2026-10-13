@@ -2,11 +2,11 @@
 
 import asyncio
 
-from app.core.database import (
+from backend.app.core.database import (
     AsyncSessionLocal,
 )
 
-from app.services.azure.meeting_analysis_service import (
+from backend.app.modules.meeting.services.meeting_analysis_service import (
     MeetingAnalysisService,
 )
 

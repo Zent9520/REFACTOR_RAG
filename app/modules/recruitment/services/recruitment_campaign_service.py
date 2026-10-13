@@ -4,15 +4,15 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from app.core.not_found_exception import (
+from backend.app.core.not_found_exception import (
     NotFoundException,
 )
 
-from backend.app.repositories.recruitment.recruitment_campaign_repository import (
+from backend.app.modules.recruitment.repositories.recruitment_campaign_repository import (
     RecruitmentCampaignRepository,
 )
 
-from backend.app.schemas.recruitment.recruitment_schema import (
+from backend.app.modules.recruitment.schemas.recruitment_schema import (
     RecruitmentCampaignResponse,
     RecruitmentCandidateResponse,
     RecruitmentCandidateDetailResponse,

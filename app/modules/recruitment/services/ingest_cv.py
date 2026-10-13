@@ -5,15 +5,15 @@ from openai import AzureOpenAI
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.not_found_exception import (
+from backend.app.core.not_found_exception import (
     NotFoundException,
 )
 
-from app.core.settings import (
+from backend.app.core.settings import (
     settings,
 )
 
-from backend.app.models.recruitment.recruitment_campaign import (
+from backend.app.modules.recruitment.models.recruitment_campaign import (
     RecruitmentCampaign,
 )
 

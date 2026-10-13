@@ -9,7 +9,7 @@ import duckdb
 from backend.app.modules.contract.contract_advanced_logging import (
     contract_advanced_logger as logger,
 )
-from app.core.settings import settings
+from backend.app.core.settings import settings
 
 
 class LegalRetrievalService:

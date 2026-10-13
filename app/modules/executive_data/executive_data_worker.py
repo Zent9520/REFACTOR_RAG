@@ -1,14 +1,14 @@
 import asyncio
 
-from app.core.database import (
+from backend.app.core.database import (
     AsyncSessionLocal,
 )
 
-from app.core.settings import (
+from backend.app.core.settings import (
     settings,
 )
 
-from app.services.govern.executive_data_sync_service import (
+from backend.app.modules.executive_data.services.executive_data_sync_service import (
     ExecutiveDataSyncService,
 )
 

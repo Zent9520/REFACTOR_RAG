@@ -2,7 +2,7 @@ from typing import Any, AsyncIterator
 
 from openai import AsyncAzureOpenAI
 
-from app.core.settings import settings
+from backend.app.core.settings import settings
 
 
 class LLMResponseTruncatedError(ValueError):

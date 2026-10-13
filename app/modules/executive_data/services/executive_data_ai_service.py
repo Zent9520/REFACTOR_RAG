@@ -1,6 +1,6 @@
 import json
 
-from app.core.settings import (
+from backend.app.core.settings import (
     settings,
 )
 

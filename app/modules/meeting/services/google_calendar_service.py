@@ -2,7 +2,7 @@ import httpx
 
 from urllib.parse import urlencode
 
-from app.core.settings import settings
+from backend.app.core.settings import settings
 
 
 class GoogleCalendarService:

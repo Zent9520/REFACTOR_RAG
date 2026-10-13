@@ -3,7 +3,7 @@ from fastapi import Depends
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import (
+from backend.app.core.database import (
     get_db,
 )
 

@@ -4,7 +4,7 @@ from openai import AsyncOpenAI
 
 from groq import AsyncGroq
 
-from app.core.settings import settings
+from backend.app.core.settings import settings
 
 
 class QueryRewriteService:

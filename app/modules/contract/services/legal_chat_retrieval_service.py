@@ -4,7 +4,7 @@ from typing import Any
 
 import duckdb
 
-from app.core.settings import settings
+from backend.app.core.settings import settings
 
 
 class LegalChatRetrievalService:

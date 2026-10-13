@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 
-from app.core.database import (
+from backend.app.core.database import (
     get_db
 )
 
@@ -15,7 +15,7 @@ from backend.app.modules.identity_access.repositories.role_repository import (
     RoleRepository
 )
 
-from app.core.settings import (
+from backend.app.core.settings import (
     settings
 )
 

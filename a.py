@@ -1,4 +1,4 @@
-from app.modules.documents.repositories.azure_chunk_repository import (
+from backend.app.modules.documents.repositories.azure_chunk_repository import (
     AzureChunkRepository
 )
 

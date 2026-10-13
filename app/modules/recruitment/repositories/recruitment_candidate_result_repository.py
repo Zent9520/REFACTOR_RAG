@@ -8,11 +8,11 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 
-from backend.app.models.recruitment.recruitment_candidate import (
+from backend.app.modules.recruitment.models.recruitment_candidate import (
     RecruitmentCandidate
 )
 
-from backend.app.models.recruitment.recruitment_candidate_result import (
+from backend.app.modules.recruitment.models.recruitment_candidate_result import (
     RecruitmentCandidateResult
 )
 

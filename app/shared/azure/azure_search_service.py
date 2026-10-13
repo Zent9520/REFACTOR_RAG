@@ -14,7 +14,7 @@ from openai import (
     AzureOpenAI
 )
 
-from app.core.settings import settings
+from backend.app.core.settings import settings
 
 from backend.app.modules.configuration.repositories.rag_config_repository import (
     WorkspaceConfigRepository

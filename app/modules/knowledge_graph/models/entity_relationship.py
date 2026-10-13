@@ -11,7 +11,7 @@ from sqlalchemy.orm import (
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
 
-from app.core.database import Base
+from backend.app.core.database import Base
 from pgvector.sqlalchemy import Vector
 
 

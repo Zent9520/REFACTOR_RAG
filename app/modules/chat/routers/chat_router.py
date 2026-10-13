@@ -4,7 +4,7 @@ from fastapi.responses import StreamingResponse
 
 from sqlalchemy.ext.asyncio import (AsyncSession)
 
-from app.core.database import (get_db)
+from backend.app.core.database import (get_db)
 
 from uuid import uuid4
 

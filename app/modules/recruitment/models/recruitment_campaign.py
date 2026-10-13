@@ -21,7 +21,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 from pgvector.sqlalchemy import Vector
 
-from app.core.database import Base
+from backend.app.core.database import Base
 
 
 class RecruitmentCampaign(Base):

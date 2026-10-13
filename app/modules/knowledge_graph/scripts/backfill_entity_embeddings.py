@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-from app.core.database import (
+from backend.app.core.database import (
     AsyncSessionLocal
 )
 

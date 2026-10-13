@@ -3,10 +3,10 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.enums.review_task_status import (
+from backend.app.modules.recruitment.enums.review_task_status import (
     ReviewTaskStatus,
 )
-from backend.app.models.recruitment.review_task import (
+from backend.app.modules.recruitment.models.review_task import (
     ReviewTask,
 )
 

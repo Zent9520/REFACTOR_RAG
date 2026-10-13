@@ -1,10 +1,10 @@
 import httpx
 
-from app.services.sharepoint.azure_project_tracking_service import (
+from backend.app.modules.project_tracking.services.azure_project_tracking_service import (
     AzureProjectTrackingService,
 )
 
-from app.services.sharepoint.sharepoint_service import (
+from backend.app.modules.documents.services.sharepoint_service import (
     SharePointService,
 )
 

@@ -22,7 +22,7 @@ from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from azure.search.documents.models import VectorizedQuery
 
-from app.core.settings import settings
+from backend.app.core.settings import settings
 from backend.app.shared.llm.bge_embedding import BGEEmbeddingService
 
 

@@ -6,7 +6,7 @@ from azure.search.documents import (
     SearchClient
 )
 
-from app.core.settings import settings
+from backend.app.core.settings import settings
 
 
 

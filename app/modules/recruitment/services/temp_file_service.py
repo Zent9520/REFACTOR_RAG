@@ -7,10 +7,10 @@ from uuid import uuid4
 
 from fastapi import UploadFile
 
-from app.enums.review_constants import (
+from backend.app.modules.recruitment.enums.review_constants import (
     ReviewConstants,
 )
-from app.enums.temp_file_result import (
+from backend.app.modules.recruitment.enums.temp_file_result import (
     TempFileResult,
 )
 

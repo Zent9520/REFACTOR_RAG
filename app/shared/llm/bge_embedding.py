@@ -20,7 +20,7 @@ from typing import Any
 
 import httpx
 
-from app.core.settings import settings
+from backend.app.core.settings import settings
 
 
 class BGEEmbeddingService:

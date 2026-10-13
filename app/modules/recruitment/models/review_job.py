@@ -15,12 +15,12 @@ from sqlalchemy.orm import relationship
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from backend.app.models.recruitment.review_task import ReviewTask
+    from backend.app.modules.recruitment.models.review_task import ReviewTask
     
     
 
 
-from app.core.database import Base
+from backend.app.core.database import Base
 
 
 class ReviewJob(Base):

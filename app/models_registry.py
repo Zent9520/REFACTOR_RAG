@@ -14,8 +14,8 @@ from backend.app.modules.configuration.models.workspace_model_config import *
 from backend.app.modules.configuration.models.workspace_rag_config import *
 from backend.app.modules.configuration.models.workspace_source_config import *
 #----CONTRACT----#
-from backend.app.modules.contract.models.contract_dashboard import *
-from backend.app.modules.contract.models.contract_raw import *
+from backend.app.modules.company.contract.models.contract_dashboard import *
+from backend.app.modules.company.contract.models.contract_raw import *
 #----DOCUMENTS----#
 from backend.app.modules.documents.models.data_source_mode import *
 from backend.app.modules.documents.models.document_type import *
@@ -40,14 +40,14 @@ from backend.app.modules.knowledge_graph.models.entity import *
 from backend.app.modules.knowledge_graph.models.entity_context import *
 from backend.app.modules.knowledge_graph.models.entity_relationship import *
 #----MEETING----#
-from backend.app.modules.meeting.models.meeting_analysis import *
-from backend.app.modules.meeting.models.meeting_transcript import *
+from backend.app.modules.company.meeting.models.meeting_analysis import *
+from backend.app.modules.company.meeting.models.meeting_transcript import *
 #----PROJECT_TRACKING----#
 from backend.app.modules.project_tracking.models.project_tracking_dashboard import *
 from backend.app.modules.project_tracking.models.project_tracking_raw import *
 #----RECRUITMENT----#
-from backend.app.modules.recruitment.models.recruitment_campaign import *
-from backend.app.modules.recruitment.models.recruitment_candidate import *
-from backend.app.modules.recruitment.models.recruitment_candidate_result import *
-from backend.app.modules.recruitment.models.review_job import *
-from backend.app.modules.recruitment.models.review_task import *
+from backend.app.modules.company.recruitment.models.recruitment_campaign import *
+from backend.app.modules.company.recruitment.models.recruitment_candidate import *
+from backend.app.modules.company.recruitment.models.recruitment_candidate_result import *
+from backend.app.modules.company.recruitment.models.review_job import *
+from backend.app.modules.company.recruitment.models.review_task import *

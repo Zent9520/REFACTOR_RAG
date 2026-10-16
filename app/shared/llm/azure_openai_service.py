@@ -77,8 +77,6 @@ class AzureOpenAIService:
         max_completion_tokens: int = 2000,
     ) -> AsyncIterator[str]:
 
-        print(messages)
-
         stream = await self._client.chat.completions.create(
             model=model,
             messages=messages,

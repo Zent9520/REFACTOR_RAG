@@ -27,8 +27,27 @@ from backend.app.modules.chat.repositories.conversation_repository import (Conve
 from backend.app.modules.configuration.enums.prompt_code import (PromptCode)
 
 import json
+import asyncio
+import logging
 
 from backend.app.modules.configuration.repositories.rag_config_repository import WorkspaceConfigRepository
+
+logger = logging.getLogger(__name__)
+
+
+async def _build_retrieval_query(db, body: ChatRequest) -> str:
+    if body.mode == PromptCode.PUBLIC:
+        return body.question
+
+    history = await SessionMemoryService.build_context(
+        db=db,
+        conversation_id=body.conversation_id,
+    )
+    if not history:
+        return body.question
+
+    return await QueryRewriteService.rewrite(history=history, question=body.question)
+
 
 router = APIRouter(
     prefix=
@@ -275,31 +294,15 @@ async def query(
 
 
 
- history = await (
-        SessionMemoryService
-        .build_context(
-            db=db,
-            conversation_id=body.conversation_id
-        )
-    )
- retrieval_query = await (
-    QueryRewriteService
-    .rewrite(
-        history=history,
-        question=body.question
-    )
-)
- print(
-    "rewritten query =",
-    retrieval_query
-)
+ retrieval_query = await _build_retrieval_query(db, body)
  
 #  print("in ra retrieval", retrieval_query)
  chunks = []
  if body.mode != PromptCode.PUBLIC:
 
     chunks = await AzureSearchService.retrieve(
-        question=body.question,
+        question=retrieval_query,
+        rewrite_query=False,
         user_object_id=body.microsoft_object_id,
         group_ids=body.group_ids,
     )
@@ -337,7 +340,8 @@ async def query(
 
     body.question
 
-   }
+   },
+   refresh=False,
 
   )
 
@@ -432,7 +436,8 @@ async def query(
                 "conversation_id": body.conversation_id,
                 "role": "assistant",
                 "content": full_answer,
-            }
+            },
+            refresh=False,
         )
     )
 
@@ -487,26 +492,7 @@ async def helpdesk_query(
             email=None,
         )
 
-    history = await (
-        SessionMemoryService
-        .build_context(
-            db=db,
-            conversation_id=body.conversation_id,
-        )
-    )
-
-    retrieval_query = await (
-        QueryRewriteService
-        .rewrite(
-            history=history,
-            question=body.question,
-        )
-    )
-
-    print(
-        "rewritten query =",
-        retrieval_query,
-    )
+    retrieval_query = await _build_retrieval_query(db, body)
 
     # ======================================
     # HELPDESK RETRIEVAL
@@ -557,7 +543,8 @@ async def helpdesk_query(
                 "content":
                 body.question,
 
-            }
+            },
+            refresh=False,
 
         )
 
@@ -647,7 +634,8 @@ async def helpdesk_query(
                     "conversation_id": body.conversation_id,
                     "role": "assistant",
                     "content": full_answer,
-                }
+                },
+                refresh=False,
             )
         )
 

@@ -1,3 +1,4 @@
+from backend.app.core.timing import timed
 from azure.search.documents import (
     SearchClient
 )
@@ -126,6 +127,7 @@ class AzureSearchService:
         question: str,
         user_object_id: str,
         group_ids: list[str],
+        rewrite_query: bool = True,
     ):
 
         client = SearchClient(
@@ -139,7 +141,10 @@ class AzureSearchService:
             group_ids=group_ids,
         )
 
-        search_text_query = await AzureSearchService.analyze_question_to_query(question)
+        search_text_query = question
+        if rewrite_query:
+            with timed("retrieval.search_rewrite"):
+                search_text_query = await AzureSearchService.analyze_question_to_query(question)
 
         openai_client = AzureOpenAI(
             api_key=settings.AZURE_OPENAI_API_KEY,
@@ -147,10 +152,12 @@ class AzureSearchService:
             api_version=settings.AZURE_OPENAI_API_VERSION,
         )
 
-        embedding_response = openai_client.embeddings.create(
-            model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
-            input=question,
-        )
+        with timed("retrieval.embedding"):
+            embedding_response = openai_client.embeddings.create(
+                model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
+                input=question,
+            )
+
         query_embedding = embedding_response.data[0].embedding
 
         vector_query = VectorizedQuery(
@@ -159,12 +166,13 @@ class AzureSearchService:
             fields="text_vector",
         )
 
-        results = list(client.search(
-            search_text=search_text_query,
-            vector_queries=[vector_query],
-            filter=acl_filter,
-            top=10,
-        ))
+        with timed("retrieval.search"):
+            results = list(client.search(
+                search_text=search_text_query,
+                vector_queries=[vector_query],
+                filter=acl_filter,
+                top=10,
+            ))
 
         if not results:
             return []
@@ -178,14 +186,15 @@ class AzureSearchService:
         escaped_parent_id = AzureSearchService._escape_odata_value(
             str(top1_parent_id)
         )
-        full_doc_chunks = list(client.search(
-            search_text="*",
-            filter=(
-                f"(parent_id eq '{escaped_parent_id}') "
-                f"and ({acl_filter})"
-            ),
-            top=1000,
-        ))
+        with timed("retrieval.document_chunks"):
+            full_doc_chunks = list(client.search(
+                search_text="*",
+                filter=(
+                    f"(parent_id eq '{escaped_parent_id}') "
+                    f"and ({acl_filter})"
+                ),
+                top=1000,
+            ))
 
         return [
         {

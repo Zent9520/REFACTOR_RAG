@@ -69,6 +69,7 @@ async def create(
     return await (
         ConversationService.create(
             db,
+            body.title,
             body.email
         )
     )

@@ -19,21 +19,19 @@ class AzureChunkRepository:
 
         client = SearchClient(
             endpoint=settings.AZURE_SEARCH_ENDPOINT,
-
-            index_name=
-            settings.AZURE_SEARCH_INDEX,
-
-            credential=
-            AzureKeyCredential(
-                settings.AZURE_SEARCH_KEY
-            )
+            index_name=settings.AZURE_SEARCH_INDEX,
+            credential=AzureKeyCredential(settings.AZURE_SEARCH_KEY)
         )
+
+        odata_filter = None
+        if parent_id:
+            safe_id = parent_id.replace("'", "''")  # escape dấu ' trong OData
+            odata_filter = f"parent_id eq '{safe_id}'"
 
         results = client.search(
             search_text="*",
-            filter=
-            f"parent_id eq '{parent_id}'",
-            top=1000
+            filter=odata_filter,
+            top=1000,
         )
 
         return [

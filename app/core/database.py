@@ -14,20 +14,15 @@ from sqlalchemy.orm import DeclarativeBase
 
 import os
 
-from dotenv import load_dotenv
+from backend.app.core.settings import settings
 
-
-load_dotenv()
-
-DATABASE_URL = os.getenv(
-    "DATABASE_URL"
-)
+if not settings.DATABASE_URL:
+    raise RuntimeError("DATABASE_URL chưa được cấu hình trong .env")
 
 
 engine = create_async_engine(
 
-    DATABASE_URL,
-
+    settings.DATABASE_URL,   # trước đây là DATABASE_URL
     echo=True,
 
 

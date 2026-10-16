@@ -1,14 +1,14 @@
-from google import genai
+import asyncio
+import logging
 
-from openai import AsyncOpenAI
-
-from groq import AsyncGroq
-
+from openai import AsyncAzureOpenAI
 from backend.app.core.settings import settings
+from backend.app.core.timing import timed
+
+logger = logging.getLogger(__name__)
 
 
 class QueryRewriteService:
-
     PROMPT = """
 Bạn là bộ máy rewrite câu hỏi cho hệ thống RAG.
 
@@ -28,119 +28,31 @@ Question:
 """
 
     @staticmethod
-    async def rewrite(
-        history: str,
-        question: str
-    ) -> str:
-
-        prompt = (
-            QueryRewriteService.PROMPT
-            .format(
-                history=history,
-                question=question
-            )
-        )
-
-        #
-        # GEMINI
-        #
-
-        try:
-
-            client = genai.Client(
-                api_key=
-                settings.GEMINI_API_KEY
-            )
-
-            response = client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=prompt
-            )
-
-            return response.text.strip()
-
-        except Exception as e:
-
-            print(
-                "Gemini failed",
-                str(e)
-            )
-
-        #
-        # OPENAI
-        #
-
-        try:
-
-            client = AsyncOpenAI(
-                api_key=
-                settings.OPENAI_API_KEY
-            )
-
-            response = await (
-                client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[
-                        {
-                            "role": "user",
-                            "content": prompt
-                        }
-                    ]
+    async def rewrite(history: str, question: str) -> str:
+        if not history.strip() or not settings.CHAT_REWRITE_DEPLOYMENT.strip():
+            return question
+        prompt = QueryRewriteService.PROMPT.format(history=history, question=question)
+        with timed("retrieval.rewrite"):
+            try:
+                return await asyncio.wait_for(
+                    QueryRewriteService._generate(prompt, question),
+                    timeout=settings.CHAT_REWRITE_TIMEOUT_SECONDS,
                 )
+            except Exception as exc:
+                logger.warning("Query rewrite failed (%s); using original question", type(exc).__name__)
+                return question
+
+    @staticmethod
+    async def _generate(prompt: str, question: str) -> str:
+        async with AsyncAzureOpenAI(
+            azure_endpoint=settings.AZURE_OPENAI_ENDPOINT.strip(),
+            api_key=settings.AZURE_OPENAI_API_KEY.strip(),
+            api_version=settings.AZURE_OPENAI_API_VERSION.strip(),
+            timeout=settings.CHAT_REWRITE_TIMEOUT_SECONDS,
+            max_retries=0,
+        ) as client:
+            response = await client.chat.completions.create(
+                model=settings.CHAT_REWRITE_DEPLOYMENT,
+                messages=[{"role": "user", "content": prompt}],
             )
-
-            return (
-                response
-                .choices[0]
-                .message
-                .content
-                .strip()
-            )
-
-        except Exception as e:
-
-            print(
-                "OpenAI failed",
-                str(e)
-            )
-
-        #
-        # GROQ
-        #
-
-        try:
-
-            client = AsyncGroq(
-                api_key=
-                settings.GROQ_API_KEY
-            )
-
-            response = await (
-                client.chat.completions.create(
-                    model=
-                    "llama-3.3-70b-versatile",
-                    messages=[
-                        {
-                            "role": "user",
-                            "content": prompt
-                        }
-                    ]
-                )
-            )
-
-            return (
-                response
-                .choices[0]
-                .message
-                .content
-                .strip()
-            )
-
-        except Exception as e:
-
-            print(
-                "Groq failed",
-                str(e)
-            )
-
-        return question
+            return (response.choices[0].message.content or "").strip() or question

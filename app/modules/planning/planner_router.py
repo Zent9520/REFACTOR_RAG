@@ -19,7 +19,7 @@ from backend.app.modules.planning.planner_service import (
 
 from fastapi.responses import RedirectResponse
 
-from backend.app.modules.meeting.services.google_calendar_service import (
+from backend.app.modules.company.meeting.services.google_calendar_service import (
     GoogleCalendarService,
 )
 

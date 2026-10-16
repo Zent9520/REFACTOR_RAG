@@ -1,13 +1,18 @@
+import pathlib
 from pydantic_settings import (
     BaseSettings,
     SettingsConfigDict
 )
 from uuid import UUID
 
+ENV_FILE = pathlib.Path(__file__).resolve().parents[2] / ".env"
 
 
 
 class Settings(BaseSettings):
+    CHAT_REWRITE_DEPLOYMENT: str = "gpt-5.1"
+    CHAT_REWRITE_TIMEOUT_SECONDS: float = 4.0
+
 
     DATABASE_URL: str | None = None
     SUPABASE_URL: str | None = None
@@ -100,7 +105,10 @@ class Settings(BaseSettings):
     AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT: str
     AZURE_DOCUMENT_INTELLIGENCE_KEY: str
 
-    LEGAL_DB_PATH: str = "./data/legal_vbpl.duckdb"
+    LEGAL_DB_PATH: str = str(
+        pathlib.Path(__file__).resolve().parents[1]
+        / "modules" / "data" / "legal_vbpl.duckdb"
+    )
     
     
     GOOGLE_CUSTOMER_ID: str
@@ -114,10 +122,8 @@ class Settings(BaseSettings):
     AZURE_SEARCH_CONTRACT_NAME: str
 
     model_config = SettingsConfigDict(
-
-        env_file=".env",
-
-        extra="ignore"
+        env_file=ENV_FILE,
+        extra="ignore",
     )
 
 

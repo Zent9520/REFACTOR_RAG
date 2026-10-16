@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 
-from app.core.database import (
+from backend.app.core.database import (
     get_db
 )
 
@@ -24,7 +24,7 @@ from pydantic import (
 
 import asyncio
 
-from app.core.database import (
+from backend.app.core.database import (
     AsyncSessionLocal
 )
 

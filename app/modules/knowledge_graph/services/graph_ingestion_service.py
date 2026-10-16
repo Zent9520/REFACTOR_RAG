@@ -13,11 +13,13 @@ from backend.app.modules.knowledge_graph.services.entity_embedding_service impor
     EntityEmbeddingService
 )
 import json
+import pathlib
 
+MOCK_CHUNKS_PATH = pathlib.Path(__file__).resolve().parents[4] / "mock_chunks.json"
 
 
 with open(
-    "mock_chunks.json",
+    MOCK_CHUNKS_PATH,
     "r",
     encoding="utf-8"
 ) as f:

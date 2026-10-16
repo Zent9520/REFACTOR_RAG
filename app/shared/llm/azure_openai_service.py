@@ -2,7 +2,7 @@ from typing import Any, AsyncIterator
 
 from openai import AsyncAzureOpenAI
 
-from app.core.settings import settings
+from backend.app.core.settings import settings
 
 
 class LLMResponseTruncatedError(ValueError):
@@ -76,8 +76,6 @@ class AzureOpenAIService:
         temperature: float = 0.2,
         max_completion_tokens: int = 2000,
     ) -> AsyncIterator[str]:
-
-        print(messages)
 
         stream = await self._client.chat.completions.create(
             model=model,

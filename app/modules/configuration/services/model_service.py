@@ -30,11 +30,11 @@ from backend.app.modules.configuration.schemas.update_ai_model_active_request im
     UpdateAIModelActiveRequest,
 )
 
-from app.core.bad_request_exception import (
+from backend.app.core.bad_request_exception import (
     BadRequestException,
 )
 
-from app.core.not_found_exception import (
+from backend.app.core.not_found_exception import (
     NotFoundException,
 )
 

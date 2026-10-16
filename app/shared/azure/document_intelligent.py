@@ -6,7 +6,7 @@ from azure.ai.documentintelligence import DocumentIntelligenceClient
 from azure.ai.documentintelligence.models import AnalyzeResult
 from azure.core.credentials import AzureKeyCredential
 
-from app.core.settings import (
+from backend.app.core.settings import (
     settings,
 )
 

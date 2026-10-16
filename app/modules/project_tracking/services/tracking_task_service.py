@@ -26,7 +26,7 @@ from backend.app.shared.llm.azure_openai_service import (
 from uuid import UUID
 
 from backend.app.modules.configuration.repositories.ai_model_repository import ( AIModelRepository)
-from app.core.settings import settings
+from backend.app.core.settings import settings
 from backend.app.modules.configuration.repositories.rag_config_repository import WorkspaceConfigRepository
 
 

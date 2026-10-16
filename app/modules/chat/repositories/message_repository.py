@@ -20,19 +20,13 @@ from sqlalchemy import func
 
 class MessageRepository:
     @staticmethod
-    async def create(
-        db,
-        payload
-        
-        ):
-        item= Message(
-            **payload
-        )
+    async def create(db, payload, *, refresh: bool = True):
+        item = Message(**payload)
         db.add(item)
         await db.commit()
-        await db.refresh(item)
+        if refresh:
+            await db.refresh(item)
         return item
-    
     @staticmethod
     async def get_by_conversation(
         db,

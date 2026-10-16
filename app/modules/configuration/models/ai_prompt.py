@@ -16,7 +16,7 @@ from sqlalchemy.orm import (
     mapped_column
 )
 
-from app.core.database import Base
+from backend.app.core.database import Base
 
 
 class AIPrompt(Base):

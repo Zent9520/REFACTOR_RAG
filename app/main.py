@@ -1,13 +1,14 @@
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-import backend.app.models_registry
+import backend.app.models_registry # noqa: F401
+
 import asyncio
 
 from backend.app.modules.documents.sharepoint_delta_worker import (
     sharepoint_delta_worker,
 )
-from backend.app.modules.meeting.meeting_analysis_worker import (
+from backend.app.modules.company.meeting.meeting_analysis_worker import (
     MeetingAnalysisWorker,
 )
 
@@ -48,7 +49,7 @@ from backend.app.modules.knowledge_graph.routers.graph_router import (
 from backend.app.modules.knowledge_graph.routers.graph_chat_router import (
     router as graph_chat_router
 )
-from backend.app.modules.recruitment.routers.recruitment_candidate_router import (
+from backend.app.modules.company.recruitment.routers.recruitment_candidate_router import (
     router as recruitment_candidate_router
 )  
 
@@ -67,7 +68,7 @@ from backend.app.modules.configuration.routers.prompt_router import (
     router as prompt_router
 )
 
-from backend.app.modules.contract.routers.contract_router import (
+from backend.app.modules.company.contract.routers.contract_router import (
     router as contract_router)
 
 from backend.app.modules.project_tracking.project_tracking_worker import (
@@ -82,7 +83,7 @@ from backend.app.modules.configuration.routers.rag_config_router import (
     router as rag_config_router,
 )
 
-from backend.app.modules.meeting.routers.meeting_router import (
+from backend.app.modules.company.meeting.routers.meeting_router import (
     router as meeting_router,
 )
 
@@ -111,7 +112,7 @@ app = FastAPI(
     root_path="/api",
 
     title=
-    "chatrag",
+    "Chat_RAG",
 
 
     version=
@@ -252,9 +253,10 @@ app.add_middleware(
 #         ExecutiveDataWorker.run(),
 #     )
 
+#uvicorn backend.app.main:app --reload
+
+
 app.include_router(role_router)
-app.include_router(tag_router)
-app.include_router(tag_role_rule_router)
 app.include_router(policy_router)
 app.include_router(chunk_router)
 app.include_router(chat_router)

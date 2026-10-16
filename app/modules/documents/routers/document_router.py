@@ -20,11 +20,11 @@ from backend.app.modules.documents.services.sharepoint_service import (
 from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
-from app.core.database import (
+from backend.app.core.database import (
     get_db
 )
 
-from app.core.settings import (
+from backend.app.core.settings import (
     settings
 )
 
@@ -67,7 +67,7 @@ from backend.app.modules.project_tracking.services.azure_project_tracking_servic
 from backend.app.modules.project_tracking.services.project_tracking_reader_service import ProjectTrackingReaderService
 from backend.app.modules.project_tracking.services.project_tracking_sync_service import ProjectTrackingSyncService
 
-from app.core.database import (
+from backend.app.core.database import (
     get_db,
     AsyncSessionLocal
 )

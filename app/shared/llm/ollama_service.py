@@ -3,7 +3,7 @@ import httpx
 from backend.app.shared.llm.base_llm import (
     BaseLLM
 )
-from app.core.settings import settings
+from backend.app.core.settings import settings
 
 class OllamaService(BaseLLM):
 

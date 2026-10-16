@@ -5,6 +5,8 @@ from uuid import UUID
 from datetime import datetime
 
 class ConversationCreate(BaseModel):
+    
+    title: str
     email: str
 
 class ConversationResponse(BaseModel):

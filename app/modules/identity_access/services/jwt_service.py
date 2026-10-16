@@ -4,7 +4,7 @@ from datetime import timezone
 
 import jwt
 
-from app.core.settings import settings
+from backend.app.core.settings import settings
 
 
 class JwtService:

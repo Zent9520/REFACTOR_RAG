@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from sqlalchemy import (
@@ -15,7 +15,7 @@ from sqlalchemy.orm import (
     mapped_column
 )
 
-from app.core.database import Base
+from backend.app.core.database import Base
 
 
 class Message(Base):
@@ -53,6 +53,6 @@ class Message(Base):
 
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.utcnow
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
     )

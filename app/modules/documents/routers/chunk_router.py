@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 
-from app.core.database import (
+from backend.app.core.database import (
     get_db
 )
 
@@ -39,12 +39,12 @@ router = APIRouter(
 # ==========================
 
 @router.get("/")
-async def get_all_chunks():
+async def get_all_chunks(parent_id: str | None = None):
 
     chunks = (
 
         AzureChunkRepository
-        .load_chunks()
+        .load_chunks(parent_id=parent_id)
 
     )
 
@@ -66,12 +66,12 @@ async def get_all_chunks():
 # ==========================
 
 @router.get("/unprocessed")
-async def get_unprocessed_chunks():
+async def get_unprocessed_chunks(parent_id: str | None = None):
 
     chunks = (
 
         ChunkRepository
-        .get_unprocessed_chunks()
+        .get_unprocessed_chunks(parent_id= parent_id)
 
     )
 

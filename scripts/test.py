@@ -1,8 +1,8 @@
-from app.core.database import (
+from backend.app.core.database import (
     AsyncSessionLocal
 )
 
-from app.services.knowledge.graph_completion_service import (
+from backend.app.modules.knowledge_graph.services.graph_completion_service import (
     GraphCompletionService
 )
 

@@ -3,6 +3,7 @@ from sqlalchemy import (
     String,
     DateTime
 )
+from datetime import timezone
 from typing import Optional
 
 from sqlalchemy.orm import (
@@ -13,7 +14,7 @@ from datetime import datetime
 
 from uuid import uuid4
 
-from app.core.database import Base
+from backend.app.core.database import Base
 
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -40,25 +41,22 @@ class Conversation(Base):
     String(50),
     nullable=True,
 )
-    title: Mapped[str|None] = (
+    title: Mapped[str] = (
         mapped_column(
             String(50),
-            default="New chat"
+            default="New chat",
+            nullable=False
         )
     )
-    created_at: Mapped[datetime]= (
-        mapped_column(
-            DateTime,
-            default=datetime.utcnow
-        )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
     )
-    updated_at: Mapped[datetime]=(
-        mapped_column(
-            DateTime,
-            default=datetime.utcnow
-        )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
     )
-    
     
 #     create table public.conversations (
 #   id uuid not null default gen_random_uuid (),

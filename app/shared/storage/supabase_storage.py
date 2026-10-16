@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from supabase import create_client
 
-from app.core.settings import settings
+from backend.app.core.settings import settings
 
 import tempfile
 

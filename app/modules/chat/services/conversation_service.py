@@ -3,24 +3,20 @@ from backend.app.modules.chat.repositories.conversation_repository import (
  ConversationRepository
 
 )
-from uuid import UUID
+from uuid import UUID, uuid4
 class ConversationService:
     @staticmethod
     async def create(
         db,
-        conversation_id: UUID,
         title: str,
         email: str | None = None
     ):
-     return await (
-         ConversationRepository.create(
-             db,
-             conversation_id=conversation_id,
-             title=title,
-             email=email,
-        
-         )
-     )
+        return await ConversationRepository.create(
+            db,
+            conversation_id=uuid4(),
+            title=title,
+            email=email
+        )
     
     @staticmethod
     async def get_all(

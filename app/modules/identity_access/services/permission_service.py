@@ -1,18 +1,18 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.models.identity_access.department_sensitivity_permission import (
+from backend.app.modules.identity_access.models.department_sensitivity_permission import (
     DepartmentSensitivityPermission,
 )
 
-from backend.app.repositories.access_control.permission_repository import (
+from backend.app.modules.identity_access.repositories.permission_repository import (
     PermissionRepository,
 )
 
-from app.core.not_found_exception import (
+from backend.app.core.not_found_exception import (
     NotFoundException,
 )
 
-from backend.app.schemas.access_control.permission_request import (
+from backend.app.modules.identity_access.schemas.permission_request import (
     CreatePermissionRequest, UpdatePermissionRequest
 )
 

@@ -12,7 +12,7 @@ import uuid
 
 from pgvector.sqlalchemy import Vector
 
-from app.core.database import Base
+from backend.app.core.database import Base
 from sqlalchemy.dialects.postgresql import UUID
 
 

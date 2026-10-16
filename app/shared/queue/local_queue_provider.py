@@ -6,7 +6,7 @@ from backend.app.shared.queue.queue_message import (
     QueueMessage,
 )
 
-from app.shared.queue.queue_provider import (
+from backend.app.shared.queue.queue_provider import (
     QueueProvider,
 )
 

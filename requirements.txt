@@ -37,3 +37,31 @@ uvicorn==0.46.0
 azure-core==2.4.0
 azure-search-documents==11.6.0
 duckdb==1.4.4
+# LLM providers
+openai==2.41.0
+groq==1.4.0
+google-generativeai==0.8.6
+
+# Document extraction
+azure-ai-documentintelligence==1.0.2
+docling==2.114.0
+docling-core==2.87.1
+
+# Database and storage
+pgvector==0.4.2
+supabase==2.31.0
+
+# Authentication
+PyJWT==2.13.0
+
+# HTTP and multipart uploads
+requests==2.34.2
+python-multipart==0.0.32
+# Cần khi chạy BGE local; không cần nếu chỉ gọi BGE qua HTTP
+FlagEmbedding==1.4.2
+
+# Cần cho file teams_bot_service.py dùng Bot Framework SDK
+botbuilder-core==4.17.1
+
+# Chỉ thấy dùng trong scripts/test_cohere.py
+cohere==7.0.4

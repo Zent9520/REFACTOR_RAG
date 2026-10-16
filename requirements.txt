@@ -34,7 +34,7 @@ tomli==2.4.1
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 uvicorn==0.46.0
-azure-core==2.4.0
+azure-core==1.41.0
 azure-search-documents==11.6.0
 duckdb==1.4.4
 # LLM providers

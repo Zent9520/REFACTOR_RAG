@@ -3,7 +3,7 @@ azure-ai-documentintelligence==1.0.2
 azure-core==1.41.0
 azure-search-documents==11.6.0
 botbuilder-core==4.17.1
-click==8.1.8
+click>=8.2.1,<9
 cohere==7.0.4
 docling==2.114.0
 docling-core==2.87.1

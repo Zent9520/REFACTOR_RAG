@@ -2,9 +2,9 @@
 
 The legal Azure AI Search index stores vectors in the ``embedding`` field
 (1024 dimensions).  The analyzer produces up to two legal retrieval seeds for
-each contract check; BGE embeds each seed independently and Azure AI Search
-queries that field.  The best unique hits from both searches become the legal
-context for the reviewer model.
+each contract check; BGE embeds all analyzer seeds in bounded batches and
+Azure AI Search queries each mapped vector.  The best unique hits from both
+seeds become the legal context for the matching reviewer item.
 
 The supplied legal index schema does not expose a legal-body/content field.
 ``vn_text`` below therefore contains only the retrievable legal metadata and
@@ -76,11 +76,46 @@ class LegalAzureSearchRetrievalService:
         The method is synchronous because the Azure SDK clients used here are
         synchronous.  ``LegalContractAnalysisService`` invokes it through
         ``asyncio.to_thread`` so an SSE request does not block the event loop.
+
+        This compatibility entry point now embeds its seeds in one batch.  The
+        legal-contract pipeline uses ``retrieve_with_vectors`` after batching
+        seeds from all checks together.
         """
 
         seeds = cls._extract_seeds(metadata_seeds)
         if not seeds:
             raise ValueError("Legal vector retrieval requires one or two seeds.")
+
+        embedding_service = BGEEmbeddingService()
+        vectors = embedding_service.embed_batch(seeds)
+        return cls.retrieve_with_vectors([
+            {
+                "seed": seed,
+                "vector": vector,
+            }
+            for seed, vector in zip(seeds, vectors, strict=True)
+        ])
+
+    @classmethod
+    def retrieve_with_vectors(
+        cls,
+        seed_vectors: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        """Search laws for precomputed seed vectors from one legal check.
+
+        Each item must contain the original ``seed`` and its matching
+        ``vector``.  Keeping those values together prevents results from one
+        contract check from being attached to another check after batch
+        embedding.
+        """
+
+        if not seed_vectors:
+            raise ValueError("Legal vector retrieval requires seed vectors.")
+        if len(seed_vectors) > cls.MAX_SEEDS:
+            raise ValueError(
+                f"Legal vector retrieval accepts at most {cls.MAX_SEEDS} "
+                "seed vectors per contract check."
+            )
 
         index_name = settings.AZURE_SEARCH_CONTRACT_NAME.strip()
         if not index_name:
@@ -93,11 +128,18 @@ class LegalAzureSearchRetrievalService:
             index_name=index_name,
             credential=AzureKeyCredential(settings.AZURE_SEARCH_KEY),
         )
-        embedding_service = BGEEmbeddingService()
 
         candidates: dict[str, dict[str, Any]] = {}
-        for seed in seeds:
-            vector = cls._embed_seed(embedding_service, seed)
+        for seed_vector in seed_vectors:
+            seed = seed_vector.get("seed")
+            vector = seed_vector.get("vector")
+
+            if not isinstance(seed, str) or not seed.strip():
+                raise ValueError(
+                    "Each legal seed vector must contain a non-empty seed."
+                )
+            cls._validate_vector(vector)
+
             vector_query = VectorizedQuery(
                 vector=vector,
                 k_nearest_neighbors=cls.TOP_K,
@@ -126,20 +168,21 @@ class LegalAzureSearchRetrievalService:
         )[:cls.TOP_K]
 
     @classmethod
-    def _embed_seed(
+    def _validate_vector(
         cls,
-        embedding_service: BGEEmbeddingService,
-        seed: str,
-    ) -> list[float]:
-        embedding = embedding_service.embed(seed)
-        if len(embedding) != cls.EMBEDDING_DIMENSIONS:
+        vector: Any,
+    ) -> None:
+        if not isinstance(vector, list) or not all(
+            isinstance(value, int | float) for value in vector
+        ):
+            raise RuntimeError("Legal embedding vector is invalid.")
+        if len(vector) != cls.EMBEDDING_DIMENSIONS:
             raise RuntimeError(
                 "Legal embedding dimension mismatch: the legal index requires "
                 f"{cls.EMBEDDING_DIMENSIONS}, but BGE returned "
-                f"{len(embedding)}. Use the same 1024-dimension BGE model "
+                f"{len(vector)}. Use the same 1024-dimension BGE model "
                 "that embedded the legal Azure Index."
             )
-        return embedding
 
     @classmethod
     def _extract_seeds(cls, raw_seeds: Any) -> list[str]:

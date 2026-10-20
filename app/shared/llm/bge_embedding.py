@@ -44,30 +44,50 @@ class BGEEmbeddingService:
         self.local_model_path = (settings.BGE_LOCAL_MODEL_PATH or "").strip()
 
     def embed(self, text: str) -> list[float]:
-        """Return one BGE embedding for a retrieval query.
+        """Return one BGE embedding for a retrieval query."""
 
-        The prefix is intentionally configurable.  It must match the query
-        instruction, if any, used while building the legal Azure Index.
+        return self.embed_batch([text])[0]
+
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Embed several retrieval queries while preserving input order.
+
+        The endpoint must return one vector for every input text.  A count
+        mismatch is rejected instead of guessing, because callers use the
+        vector position to map legal results back to the correct contract
+        check.
         """
 
-        if not text or not text.strip():
-            raise ValueError("BGE embedding input must not be empty.")
+        if not texts:
+            raise ValueError("BGE embedding batch must not be empty.")
 
-        request_text = f"{self.query_prefix}{text.strip()}"
+        request_texts: list[str] = []
+        for text in texts:
+            if not isinstance(text, str) or not text.strip():
+                raise ValueError(
+                    "Every BGE embedding batch item must be a non-empty string."
+                )
+            request_texts.append(f"{self.query_prefix}{text.strip()}")
 
         if self.endpoint:
-            vector = self._embed_http(request_text)
+            vectors = self._embed_http_batch(request_texts)
         elif self.local_model_path:
-            vector = self._embed_local(request_text)
+            vectors = self._embed_local_batch(request_texts)
         else:
             raise RuntimeError(
                 "BGE is not configured. Set BGE_EMBEDDING_ENDPOINT (HTTP "
                 "mode) or BGE_LOCAL_MODEL_PATH (local model mode)."
             )
 
+        if len(vectors) != len(request_texts):
+            raise RuntimeError(
+                "BGE embedding count mismatch: "
+                f"sent {len(request_texts)} texts but received "
+                f"{len(vectors)} vectors."
+            )
+
         if settings.BGE_NORMALIZE_EMBEDDINGS:
-            vector = self._normalize(vector)
-        return vector
+            vectors = [self._normalize(vector) for vector in vectors]
+        return vectors
 
     @classmethod
     def preload(cls) -> None:
@@ -94,27 +114,36 @@ class BGEEmbeddingService:
         return cls._local_model
 
     def _embed_local(self, text: str) -> list[float]:
+        return self._embed_local_batch([text])[0]
+
+    def _embed_local_batch(self, texts: list[str]) -> list[list[float]]:
         model = self._get_local_model(self.local_model_path)
         with self._encode_lock:
             output = model.encode(
-                [text],
-                batch_size=1,
+                texts,
+                batch_size=len(texts),
                 max_length=self.LOCAL_MAX_LENGTH,
                 return_dense=True,
                 return_sparse=False,
                 return_colbert_vecs=False,
             )
-        return [float(value) for value in output["dense_vecs"][0]]
+        return [
+            [float(value) for value in vector]
+            for vector in output["dense_vecs"]
+        ]
 
     # ------------------------------------------------------------------
     # HTTP endpoint mode
     # ------------------------------------------------------------------
     def _embed_http(self, text: str) -> list[float]:
+        return self._embed_http_batch([text])[0]
+
+    def _embed_http_batch(self, texts: list[str]) -> list[list[float]]:
         headers = {"Content-Type": "application/json"}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
 
-        payload = self._build_payload(text)
+        payload = self._build_payload(texts)
         with httpx.Client(timeout=self.DEFAULT_TIMEOUT_SECONDS) as client:
             response = client.post(
                 self.endpoint,
@@ -123,47 +152,76 @@ class BGEEmbeddingService:
             )
             response.raise_for_status()
 
-        return self._extract_vector(response.json())
+        return self._extract_vectors(
+            response.json(),
+            expected_count=len(texts),
+        )
 
-    def _build_payload(self, text: str) -> dict[str, Any]:
+    def _build_payload(self, texts: list[str]) -> dict[str, Any]:
         if self.request_format == "openai":
-            return {"model": self.model, "input": text}
+            return {"model": self.model, "input": texts}
         if self.request_format == "huggingface":
-            return {"inputs": text}
+            return {"inputs": texts}
         raise ValueError(
             "BGE_EMBEDDING_REQUEST_FORMAT must be 'openai' or 'huggingface'."
         )
 
-    @staticmethod
-    def _extract_vector(payload: Any) -> list[float]:
-        candidate: Any = None
+    @classmethod
+    def _extract_vector(cls, payload: Any) -> list[float]:
+        return cls._extract_vectors(payload, expected_count=1)[0]
+
+    @classmethod
+    def _extract_vectors(
+        cls,
+        payload: Any,
+        expected_count: int,
+    ) -> list[list[float]]:
+        candidates: Any = None
 
         if isinstance(payload, dict):
             data = payload.get("data")
-            if isinstance(data, list) and data and isinstance(data[0], dict):
-                candidate = data[0].get("embedding")
-            if candidate is None:
-                candidate = payload.get("embedding")
-            if candidate is None:
-                embeddings = payload.get("embeddings")
-                if isinstance(embeddings, list) and embeddings:
-                    candidate = embeddings[0]
-        elif isinstance(payload, list) and payload:
-            candidate = payload[0]
+            if isinstance(data, list) and data and all(
+                isinstance(item, dict) for item in data
+            ):
+                if all(isinstance(item.get("index"), int) for item in data):
+                    data = sorted(data, key=lambda item: item["index"])
+                candidates = [item.get("embedding") for item in data]
+            elif isinstance(payload.get("embeddings"), list):
+                candidates = payload["embeddings"]
+            elif payload.get("embedding") is not None:
+                candidates = [payload["embedding"]]
+        elif isinstance(payload, list):
+            candidates = payload
 
-        # Hugging Face feature-extraction endpoints may return [[float, ...]].
-        if isinstance(candidate, list) and candidate and isinstance(candidate[0], list):
-            candidate = candidate[0]
-
-        if not isinstance(candidate, list) or not all(
-            isinstance(value, int | float) for value in candidate
-        ):
+        if not isinstance(candidates, list):
             raise RuntimeError(
-                "BGE endpoint response does not contain an embedding vector. "
-                "Update BGEEmbeddingService._extract_vector for its response schema."
+                "BGE endpoint response does not contain embedding vectors. "
+                "Update BGEEmbeddingService._extract_vectors for its response schema."
             )
 
-        return [float(value) for value in candidate]
+        # Keep compatibility with endpoints that return one flat vector for a
+        # one-item batch.
+        if expected_count == 1 and candidates and all(
+            isinstance(value, int | float) for value in candidates
+        ):
+            candidates = [candidates]
+
+        vectors: list[list[float]] = []
+        for candidate in candidates:
+            if not isinstance(candidate, list) or not candidate or not all(
+                isinstance(value, int | float) for value in candidate
+            ):
+                raise RuntimeError(
+                    "BGE endpoint response contains an invalid embedding vector."
+                )
+            vectors.append([float(value) for value in candidate])
+
+        if len(vectors) != expected_count:
+            raise RuntimeError(
+                "BGE endpoint embedding count mismatch: "
+                f"expected {expected_count}, received {len(vectors)}."
+            )
+        return vectors
 
     @staticmethod
     def _normalize(vector: list[float]) -> list[float]:

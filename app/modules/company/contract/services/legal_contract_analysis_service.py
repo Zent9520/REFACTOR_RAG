@@ -17,12 +17,16 @@ from backend.app.modules.company.contract.services.legal_azure_search_retrieval_
     LegalAzureSearchRetrievalService,
 )
 from backend.app.shared.llm.azure_openai_service import AzureOpenAIService
+from backend.app.shared.llm.bge_embedding import BGEEmbeddingService
 
 
 class LegalContractAnalysisService:
     MAX_LEGAL_CHECKS = 8
     MAX_SEEDS_PER_METADATA_FIELD = 2
     MAX_SEEDS = 2
+    MIN_BGE_BATCH_SIZE = 8
+    MAX_BGE_BATCH_SIZE = 32
+    BGE_BATCH_SIZE = 16
     ALLOWED_METADATA_FIELDS = {
             "doc_type",
             "doc_number",
@@ -96,6 +100,20 @@ class LegalContractAnalysisService:
         total = len(legal_checks)
         yield {"event": "started", "data": {"total": total}}
 
+        embedding_started_at = perf_counter()
+        seed_records = self._build_seed_records(legal_checks)
+        embedded_seed_records = await self._embed_seed_records(seed_records)
+        seed_records_by_check = self._group_seed_records_by_check(
+            embedded_seed_records
+        )
+        contract_split_logger.info(
+            "[LEGAL_CONTRACT][TIMING] bge_batch=%.3fs seeds=%d "
+            "batch_size=%d",
+            perf_counter() - embedding_started_at,
+            len(seed_records),
+            self.BGE_BATCH_SIZE,
+        )
+
         for index, check in enumerate(legal_checks):
             check_started_at = perf_counter()
             reviewer_timed = False
@@ -103,9 +121,28 @@ class LegalContractAnalysisService:
             try:
                 retrieval_started_at = perf_counter()
                 try:
+                    current_seed_records = seed_records_by_check.get(index, [])
+                    embedding_errors = [
+                        record["embedding_error"]
+                        for record in current_seed_records
+                        if record.get("embedding_error")
+                    ]
+                    if embedding_errors:
+                        raise RuntimeError(
+                            "BGE batch embedding failed for this legal check: "
+                            + "; ".join(dict.fromkeys(embedding_errors))
+                        )
+
+                    seed_vectors = [
+                        {
+                            "seed": record["seed"],
+                            "vector": record["vector"],
+                        }
+                        for record in current_seed_records
+                    ]
                     documents = await asyncio.to_thread(
-                        LegalAzureSearchRetrievalService.retrieve,
-                        check["seeds"],
+                        LegalAzureSearchRetrievalService.retrieve_with_vectors,
+                        seed_vectors,
                     )
                 finally:
                     contract_split_logger.info(
@@ -182,6 +219,99 @@ class LegalContractAnalysisService:
             perf_counter() - total_started_at,
         )
         yield {"event": "completed", "data": {"total": total}}
+
+    @classmethod
+    def _build_seed_records(
+        cls,
+        legal_checks: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        """Flatten checks without losing the Context -> Seed relationship."""
+
+        records: list[dict[str, Any]] = []
+        for check_index, check in enumerate(legal_checks):
+            for seed_index, seed in enumerate(check["seeds"]):
+                records.append({
+                    "check_index": check_index,
+                    "seed_index": seed_index,
+                    "contract_text": check["contract_text"],
+                    "seed": seed,
+                    "vector": None,
+                    "embedding_error": None,
+                })
+        return records
+
+    @classmethod
+    async def _embed_seed_records(
+        cls,
+        seed_records: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        """Embed all analyzer seeds in bounded batches and preserve order."""
+
+        if not (
+            cls.MIN_BGE_BATCH_SIZE
+            <= cls.BGE_BATCH_SIZE
+            <= cls.MAX_BGE_BATCH_SIZE
+        ):
+            raise RuntimeError(
+                "BGE_BATCH_SIZE must be between "
+                f"{cls.MIN_BGE_BATCH_SIZE} and {cls.MAX_BGE_BATCH_SIZE}."
+            )
+
+        records = [dict(record) for record in seed_records]
+        embedding_service = BGEEmbeddingService()
+
+        for start in range(0, len(records), cls.BGE_BATCH_SIZE):
+            batch = records[start:start + cls.BGE_BATCH_SIZE]
+            texts = [record["seed"] for record in batch]
+            batch_started_at = perf_counter()
+
+            try:
+                vectors = await asyncio.to_thread(
+                    embedding_service.embed_batch,
+                    texts,
+                )
+                for vector in vectors:
+                    if len(vector) != (
+                        LegalAzureSearchRetrievalService.EMBEDDING_DIMENSIONS
+                    ):
+                        raise RuntimeError(
+                            "Legal embedding dimension mismatch: expected "
+                            f"{LegalAzureSearchRetrievalService.EMBEDDING_DIMENSIONS}, "
+                            f"received {len(vector)}."
+                        )
+
+                for record, vector in zip(batch, vectors, strict=True):
+                    record["vector"] = vector
+            except Exception as exc:
+                contract_split_logger.exception(
+                    "[LEGAL_CONTRACT][BGE BATCH %d-%d] failed",
+                    start,
+                    start + len(batch) - 1,
+                )
+                for record in batch:
+                    record["embedding_error"] = str(exc)
+            finally:
+                contract_split_logger.info(
+                    "[LEGAL_CONTRACT][BGE BATCH %d-%d] total=%.3fs seeds=%d",
+                    start,
+                    start + len(batch) - 1,
+                    perf_counter() - batch_started_at,
+                    len(batch),
+                )
+
+        return records
+
+    @staticmethod
+    def _group_seed_records_by_check(
+        seed_records: list[dict[str, Any]],
+    ) -> dict[int, list[dict[str, Any]]]:
+        grouped: dict[int, list[dict[str, Any]]] = {}
+        for record in seed_records:
+            grouped.setdefault(record["check_index"], []).append(record)
+
+        for records in grouped.values():
+            records.sort(key=lambda record: record["seed_index"])
+        return grouped
 
     async def _call_analyzer(
         self,

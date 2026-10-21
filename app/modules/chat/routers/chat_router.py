@@ -1,4 +1,4 @@
-from fastapi import (APIRouter, Depends)
+from fastapi import (APIRouter, Depends, HTTPException)
 
 from fastapi.responses import StreamingResponse
 
@@ -32,6 +32,10 @@ import logging
 
 from backend.app.modules.configuration.repositories.rag_config_repository import WorkspaceConfigRepository
 
+from backend.app.modules.identity_access.services.permission_service import (
+    PermissionService,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -47,6 +51,41 @@ async def _build_retrieval_query(db, body: ChatRequest) -> str:
         return body.question
 
     return await QueryRewriteService.rewrite(history=history, question=body.question)
+
+
+async def _get_access_permissions(
+    db: AsyncSession,
+    body: ChatRequest,
+) -> list[dict]:
+    if not any(
+        str(group_id).strip()
+        for group_id in body.group_ids
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="User does not belong to an allowed group.",
+        )
+
+    role_name = body.role.strip()
+
+    if not role_name:
+        raise HTTPException(
+            status_code=403,
+            detail="Role is required for document access.",
+        )
+
+    permissions = await PermissionService.get_role_access(
+        db=db,
+        role_name=role_name,
+    )
+
+    if not permissions:
+        raise HTTPException(
+            status_code=403,
+            detail="Role does not have document access permission.",
+        )
+
+    return permissions
 
 
 router = APIRouter(
@@ -300,11 +339,16 @@ async def query(
  chunks = []
  if body.mode != PromptCode.PUBLIC:
 
+    permissions = await _get_access_permissions(
+        db=db,
+        body=body,
+    )
+
     chunks = await AzureSearchService.retrieve(
         question=retrieval_query,
         rewrite_query=False,
-        user_object_id=body.microsoft_object_id,
         group_ids=body.group_ids,
+        permissions=permissions,
     )
 
 
@@ -514,11 +558,16 @@ async def helpdesk_query(
 
     if body.mode != PromptCode.PUBLIC:
 
+        permissions = await _get_access_permissions(
+            db=db,
+            body=body,
+        )
+
         chunks = AzureSearchService.retrieve_helpdesk(
             question=retrieval_query,
             top_k=top_k,
-            user_object_id=body.microsoft_object_id,
             group_ids=body.group_ids,
+            permissions=permissions,
         )
 
     # ======================================

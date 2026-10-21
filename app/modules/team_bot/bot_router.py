@@ -209,7 +209,7 @@ async def teams_message(
         # ====================
 
         group_response = await client.get(
-            f"https://graph.microsoft.com/v1.0/users/{aad_object_id}/memberOf?$select=displayName",
+            f"https://graph.microsoft.com/v1.0/users/{aad_object_id}/memberOf?$select=id,displayName",
             headers=headers
         )
 
@@ -238,6 +238,12 @@ async def teams_message(
 
             for group
             in groups
+        ]
+
+        group_ids = [
+            group.get("id", "")
+            for group in groups
+            if group.get("id")
         ]
 
         print(
@@ -334,11 +340,12 @@ async def teams_message(
     )
 
 
-    chunks = (
+    chunks = await (
         AzureSearchService
         .retrieve(
             question=question,
-            permissions=permissions
+            group_ids=group_ids,
+            permissions=permissions,
         )
     )
 

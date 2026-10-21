@@ -29,6 +29,8 @@ class ChatRequest(
 
     group_ids: list[str]
 
+    role: str
+
 
     model_id:str
     

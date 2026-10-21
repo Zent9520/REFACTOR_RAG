@@ -1,3 +1,6 @@
+import json
+import logging
+
 from backend.app.core.timing import timed
 from azure.search.documents import (
     SearchClient
@@ -23,7 +26,9 @@ from backend.app.modules.configuration.repositories.rag_config_repository import
 from backend.app.modules.configuration.enums.prompt_code import PromptCode
 
 from backend.app.shared.llm.azure_openai_service import AzureOpenAIService
-import json
+
+
+logger = logging.getLogger(__name__)
 
 
 class AzureSearchService:
@@ -35,24 +40,9 @@ class AzureSearchService:
 
     @staticmethod
     def build_acl_filter(
-        user_object_id: str,
         group_ids: list[str],
+        permissions: list[dict],
     ) -> str:
-
-        user_object_id = user_object_id.strip()
-
-        if not user_object_id:
-            raise ValueError("user_object_id must not be empty.")
-
-        escaped_user_id = (
-            AzureSearchService
-            ._escape_odata_value(user_object_id)
-        )
-        filters = [
-            "allowed_user_ids/any("
-            f"u: u eq '{escaped_user_id}'"
-            ")"
-        ]
         normalized_group_ids = []
         seen_group_ids = set()
 
@@ -68,18 +58,54 @@ class AzureSearchService:
                 ._escape_odata_value(group_id)
             )
 
-        if normalized_group_ids:
-            group_filter = " or ".join(
-                f"g eq '{group_id}'"
-                for group_id in normalized_group_ids
-            )
-            filters.append(
-                "allowed_group_ids/any("
-                f"g: {group_filter}"
-                ")"
-            )
+        if not normalized_group_ids:
+            raise ValueError("group_ids must not be empty.")
 
-        return " or ".join(filters)
+        group_conditions = " or ".join(
+            f"g eq '{group_id}'"
+            for group_id in normalized_group_ids
+        )
+        group_filter = (
+            "allowed_group_ids/any("
+            f"g: {group_conditions}"
+            ")"
+        )
+
+        permission_by_department: dict[str, int] = {}
+
+        for permission in permissions:
+            department = str(
+                permission.get("department") or ""
+            ).strip()
+            max_sensitivity = permission.get("max_sensitivity")
+
+            if not department or isinstance(max_sensitivity, bool):
+                continue
+
+            try:
+                max_sensitivity = int(max_sensitivity)
+            except (TypeError, ValueError):
+                continue
+
+            current_max = permission_by_department.get(department)
+
+            if current_max is None or max_sensitivity > current_max:
+                permission_by_department[department] = max_sensitivity
+
+        if not permission_by_department:
+            raise ValueError("permissions must not be empty.")
+
+        permission_conditions = " or ".join(
+            "(department eq "
+            f"'{AzureSearchService._escape_odata_value(department)}' "
+            f"and sensitivity le {max_sensitivity})"
+            for department, max_sensitivity in permission_by_department.items()
+        )
+
+        return (
+            f"({group_filter}) "
+            f"and ({permission_conditions})"
+        )
     
     
     
@@ -114,7 +140,7 @@ class AzureSearchService:
             )
         )
 
-        print("Rewritten search query:", result)
+        logger.info("Rewritten search query: %s", result)
 
         search_text_query = result.strip() if result else question
 
@@ -125,8 +151,8 @@ class AzureSearchService:
     @staticmethod
     async def retrieve(
         question: str,
-        user_object_id: str,
         group_ids: list[str],
+        permissions: list[dict],
         rewrite_query: bool = True,
     ):
 
@@ -137,8 +163,8 @@ class AzureSearchService:
         )
 
         acl_filter = AzureSearchService.build_acl_filter(
-            user_object_id=user_object_id,
             group_ids=group_ids,
+            permissions=permissions,
         )
 
         search_text_query = question
@@ -181,7 +207,11 @@ class AzureSearchService:
         top1_parent_id = top1.get("parent_id")
         top1_title = top1.get("title")
 
-        print("Top1 chunk thuộc document:", top1_title, "| parent_id:", top1_parent_id)
+        logger.info(
+            "Top chunk document: %s | parent_id: %s",
+            top1_title,
+            top1_parent_id,
+        )
 
         escaped_parent_id = AzureSearchService._escape_odata_value(
             str(top1_parent_id)
@@ -290,8 +320,8 @@ class AzureSearchService:
     def retrieve_helpdesk(
         question: str,
         top_k: int,
-        user_object_id: str,
         group_ids: list[str],
+        permissions: list[dict],
     ):
 
         client = SearchClient(
@@ -373,18 +403,15 @@ class AzureSearchService:
         )
 
         acl_filter = AzureSearchService.build_acl_filter(
-            user_object_id=user_object_id,
             group_ids=group_ids,
+            permissions=permissions,
         )
         azure_filter = (
             "(workspace eq 'HELPDESK') "
             f"and ({acl_filter})"
         )
 
-        print(
-            "Azure Filter:",
-            azure_filter,
-        )
+        logger.info("Azure Filter: %s", azure_filter)
 
         results = client.search(
 

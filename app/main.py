@@ -1,6 +1,11 @@
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from backend.app.shared.resilience.exceptions import (
+    CapacityError,
+    DependencyQueueTimeoutError,
+    TokenBudgetExceededError,
+)
 import backend.app.models_registry # noqa: F401
 
 import asyncio
@@ -158,6 +163,42 @@ async def validation_exception_handler(request, exc):
         content={
             "detail": errors,
         },
+    )
+
+
+@app.exception_handler(CapacityError)
+async def capacity_error_handler(request, exc):
+    return JSONResponse(
+        status_code=503,
+        content={
+            "code": "DEPENDENCY_BUSY",
+            "detail": "Hệ thống đang xử lý nhiều yêu cầu. Vui lòng thử lại sau.",
+        },
+        headers={"Retry-After": "10"},
+    )
+
+
+@app.exception_handler(DependencyQueueTimeoutError)
+async def dependency_queue_timeout_handler(request, exc):
+    return JSONResponse(
+        status_code=503,
+        content={
+            "code": "DEPENDENCY_BUSY",
+            "detail": "Hệ thống đang xử lý nhiều yêu cầu. Vui lòng thử lại sau.",
+        },
+        headers={"Retry-After": "10"},
+    )
+
+
+@app.exception_handler(TokenBudgetExceededError)
+async def token_budget_exceeded_handler(request, exc):
+    return JSONResponse(
+        status_code=503,
+        content={
+            "code": "LLM_TOKEN_BUDGET_EXCEEDED",
+            "detail": "Yêu cầu vượt quá ngân sách token an toàn của hệ thống.",
+        },
+        headers={"Retry-After": "30"},
     )
 
 

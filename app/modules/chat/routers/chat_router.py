@@ -35,6 +35,12 @@ from backend.app.modules.configuration.repositories.rag_config_repository import
 from backend.app.modules.identity_access.services.permission_service import (
     PermissionService,
 )
+from backend.app.shared.resilience.capacity_manager import capacity_manager
+from backend.app.shared.resilience.exceptions import (
+    CapacityError,
+    PipelineCapacityExceededError,
+    UserCapacityExceededError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -88,11 +94,36 @@ async def _get_access_permissions(
     return permissions
 
 
+async def _chat_admission(body: ChatRequest):
+    try:
+        permit = await capacity_manager.acquire_admission(
+            user_id=body.microsoft_object_id,
+        )
+    except UserCapacityExceededError as exc:
+        raise HTTPException(
+            status_code=429,
+            detail="Bạn đang có quá nhiều yêu cầu đang xử lý.",
+            headers={"Retry-After": "10"},
+        ) from exc
+    except PipelineCapacityExceededError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Hệ thống đang xử lý nhiều yêu cầu. Vui lòng thử lại sau.",
+            headers={"Retry-After": "10"},
+        ) from exc
+
+    try:
+        yield permit
+    finally:
+        await permit.release()
+
+
 router = APIRouter(
     prefix=
     "/chat",
     tags=
-    ["Chat"]
+    ["Chat"],
+    dependencies=[Depends(_chat_admission)],
 
 )
 
@@ -427,34 +458,44 @@ async def query(
         },
     )
 
-    async for token in rag_service.ask_stream(
-        db=db,
-        conversation_id=body.conversation_id,
-        question=body.question,
-        chunks=chunks,
-        model_id=body.model_id,
-        mode=body.mode,
-        workspace_code=workscpace_code,
-    ):
+    try:
+        async for token in rag_service.ask_stream(
+            db=db,
+            conversation_id=body.conversation_id,
+            question=body.question,
+            chunks=chunks,
+            model_id=body.model_id,
+            mode=body.mode,
+            workspace_code=workscpace_code,
+        ):
 
-        raw_answer += token
+            raw_answer += token
+            answer_delta = token
 
-        answer_delta = token
+            if public_parser is not None:
+                answer_delta = public_parser.feed(token)
 
-        if public_parser is not None:
-
-            answer_delta = public_parser.feed(token)
-
-        if answer_delta:
-
-            full_answer += answer_delta
-
-            yield sse_event(
-                "answer",
-                {
-                    "delta": answer_delta,
-                },
-            )
+            if answer_delta:
+                full_answer += answer_delta
+                yield sse_event(
+                    "answer",
+                    {
+                        "delta": answer_delta,
+                    },
+                )
+    except CapacityError as exc:
+        logger.warning("Chat stream capacity error: %s", exc)
+        yield sse_event(
+            "error",
+            {
+                "code": "LLM_BUSY",
+                "message": (
+                    "Hệ thống đang xử lý nhiều yêu cầu. "
+                    "Vui lòng thử lại sau."
+                ),
+            },
+        )
+        return
 
     if body.mode == PromptCode.PUBLIC:
 
@@ -563,7 +604,7 @@ async def helpdesk_query(
             body=body,
         )
 
-        chunks = AzureSearchService.retrieve_helpdesk(
+        chunks = await AzureSearchService.retrieve_helpdesk(
             question=retrieval_query,
             top_k=top_k,
             group_ids=body.group_ids,
@@ -630,34 +671,44 @@ async def helpdesk_query(
             },
         )
 
-        async for token in rag_service.ask_stream(
-            db=db,
-            conversation_id=body.conversation_id,
-            question=body.question,
-            chunks=chunks,
-            model_id=body.model_id,
-            mode=body.mode,
-            workspace_code=workscpace_code,
-        ):
+        try:
+            async for token in rag_service.ask_stream(
+                db=db,
+                conversation_id=body.conversation_id,
+                question=body.question,
+                chunks=chunks,
+                model_id=body.model_id,
+                mode=body.mode,
+                workspace_code=workscpace_code,
+            ):
 
-            raw_answer += token
+                raw_answer += token
+                answer_delta = token
 
-            answer_delta = token
+                if public_parser is not None:
+                    answer_delta = public_parser.feed(token)
 
-            if public_parser is not None:
-
-                answer_delta = public_parser.feed(token)
-
-            if answer_delta:
-
-                full_answer += answer_delta
-
-                yield sse_event(
-                    "answer",
-                    {
-                        "delta": answer_delta,
-                    },
-                )
+                if answer_delta:
+                    full_answer += answer_delta
+                    yield sse_event(
+                        "answer",
+                        {
+                            "delta": answer_delta,
+                        },
+                    )
+        except CapacityError as exc:
+            logger.warning("Chat stream capacity error: %s", exc)
+            yield sse_event(
+                "error",
+                {
+                    "code": "LLM_BUSY",
+                    "message": (
+                        "Hệ thống đang xử lý nhiều yêu cầu. "
+                        "Vui lòng thử lại sau."
+                    ),
+                },
+            )
+            return
 
         if body.mode == PromptCode.PUBLIC:
 

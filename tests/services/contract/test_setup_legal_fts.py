@@ -7,7 +7,7 @@ from pathlib import Path
 
 import duckdb
 
-from backend.app.modules.contract.scripts.setup_legal_fts import setup
+from backend.app.modules.company.contract.scripts.setup_legal_fts import setup
 
 
 class SetupLegalFtsTest(unittest.TestCase):

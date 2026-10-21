@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 
@@ -15,7 +16,8 @@ from azure.core.credentials import (
 )
 
 from openai import (
-    AzureOpenAI
+    AsyncAzureOpenAI,
+    AzureOpenAI,
 )
 
 from backend.app.core.settings import settings
@@ -26,6 +28,8 @@ from backend.app.modules.configuration.repositories.rag_config_repository import
 from backend.app.modules.configuration.enums.prompt_code import PromptCode
 
 from backend.app.shared.llm.azure_openai_service import AzureOpenAIService
+from backend.app.shared.resilience.capacity_manager import capacity_manager
+from backend.app.shared.resilience.retry_policy import retry_async
 
 
 logger = logging.getLogger(__name__)
@@ -155,96 +159,131 @@ class AzureSearchService:
         permissions: list[dict],
         rewrite_query: bool = True,
     ):
-
         client = SearchClient(
             endpoint=settings.AZURE_SEARCH_ENDPOINT,
             index_name=settings.AZURE_SEARCH_INDEX,
             credential=AzureKeyCredential(settings.AZURE_SEARCH_KEY),
         )
-
         acl_filter = AzureSearchService.build_acl_filter(
             group_ids=group_ids,
             permissions=permissions,
         )
-
         search_text_query = question
         if rewrite_query:
             with timed("retrieval.search_rewrite"):
-                search_text_query = await AzureSearchService.analyze_question_to_query(question)
+                search_text_query = await AzureSearchService.analyze_question_to_query(
+                    question
+                )
 
-        openai_client = AzureOpenAI(
-            api_key=settings.AZURE_OPENAI_API_KEY,
-            azure_endpoint=settings.AZURE_OPENAI_ENDPOINT,
-            api_version=settings.AZURE_OPENAI_API_VERSION,
-        )
+        async with capacity_manager.search_slot():
+            openai_client = AsyncAzureOpenAI(
+                api_key=settings.AZURE_OPENAI_API_KEY,
+                azure_endpoint=settings.AZURE_OPENAI_ENDPOINT,
+                api_version=settings.AZURE_OPENAI_API_VERSION,
+                max_retries=0,
+            )
+            try:
+                with timed("retrieval.embedding"):
+                    async with capacity_manager.embedding_slot():
+                        embedding_response = await retry_async(
+                            lambda: asyncio.wait_for(
+                                openai_client.embeddings.create(
+                                    model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
+                                    input=question,
+                                ),
+                                timeout=(
+                                    settings
+                                    .AZURE_OPENAI_EMBEDDING_REQUEST_TIMEOUT_SECONDS
+                                ),
+                            ),
+                            operation_name="azure_openai.embedding",
+                        )
+            finally:
+                await openai_client.close()
 
-        with timed("retrieval.embedding"):
-            embedding_response = openai_client.embeddings.create(
-                model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
-                input=question,
+            query_embedding = embedding_response.data[0].embedding
+            vector_query = VectorizedQuery(
+                vector=query_embedding,
+                k_nearest_neighbors=10,
+                fields="text_vector",
             )
 
-        query_embedding = embedding_response.data[0].embedding
+            with timed("retrieval.search"):
+                results = await retry_async(
+                    lambda: asyncio.wait_for(
+                        asyncio.to_thread(
+                            lambda: list(
+                                client.search(
+                                    search_text=search_text_query,
+                                    vector_queries=[vector_query],
+                                    filter=acl_filter,
+                                    top=10,
+                                )
+                            )
+                        ),
+                        timeout=settings.AZURE_SEARCH_REQUEST_TIMEOUT_SECONDS,
+                    ),
+                    operation_name="azure_search.top_chunks",
+                )
 
-        vector_query = VectorizedQuery(
-            vector=query_embedding,
-            k_nearest_neighbors=10,
-            fields="text_vector",
-        )
+            if not results:
+                client.close()
+                return []
 
-        with timed("retrieval.search"):
-            results = list(client.search(
-                search_text=search_text_query,
-                vector_queries=[vector_query],
-                filter=acl_filter,
-                top=10,
-            ))
+            top1 = results[0]
+            top1_parent_id = top1.get("parent_id")
+            top1_title = top1.get("title")
+            logger.info(
+                "Top chunk document: %s | parent_id: %s",
+                top1_title,
+                top1_parent_id,
+            )
+            escaped_parent_id = AzureSearchService._escape_odata_value(
+                str(top1_parent_id)
+            )
 
-        if not results:
-            return []
-
-        top1 = results[0]
-        top1_parent_id = top1.get("parent_id")
-        top1_title = top1.get("title")
-
-        logger.info(
-            "Top chunk document: %s | parent_id: %s",
-            top1_title,
-            top1_parent_id,
-        )
-
-        escaped_parent_id = AzureSearchService._escape_odata_value(
-            str(top1_parent_id)
-        )
-        with timed("retrieval.document_chunks"):
-            full_doc_chunks = list(client.search(
-                search_text="*",
-                filter=(
-                    f"(parent_id eq '{escaped_parent_id}') "
-                    f"and ({acl_filter})"
-                ),
-                top=1000,
-            ))
+            try:
+                with timed("retrieval.document_chunks"):
+                    full_doc_chunks = await retry_async(
+                        lambda: asyncio.wait_for(
+                            asyncio.to_thread(
+                                lambda: list(
+                                    client.search(
+                                        search_text="*",
+                                        filter=(
+                                            f"(parent_id eq '{escaped_parent_id}') "
+                                            f"and ({acl_filter})"
+                                        ),
+                                        top=1000,
+                                    )
+                                )
+                            ),
+                            timeout=settings.AZURE_SEARCH_REQUEST_TIMEOUT_SECONDS,
+                        ),
+                        operation_name="azure_search.document_chunks",
+                    )
+            finally:
+                client.close()
 
         return [
-        {
-            "score": doc.get("@search.score"),
-            "chunk_id": doc.get("chunk_id"),
-            "parent_id": doc.get("parent_id"),
-            "title": doc.get("title"),
-            "content": doc.get("chunk"),
-            "source_file": doc.get("source_file"),
-            "department": doc.get("department"),
-            "owner_role": doc.get("owner_role"),
-            "security_level": doc.get("security_level"),
-            "document_type": doc.get("document_type"),
-            "sensitivity": doc.get("sensitivity"),
-            "source_url": doc.get("source_url"),
-            "drive_id": doc.get("drive_id"),
-            "drive_item_id": doc.get("drive_item_id"),
-        }
-        for doc in full_doc_chunks
-    ]
+            {
+                "score": doc.get("@search.score"),
+                "chunk_id": doc.get("chunk_id"),
+                "parent_id": doc.get("parent_id"),
+                "title": doc.get("title"),
+                "content": doc.get("chunk"),
+                "source_file": doc.get("source_file"),
+                "department": doc.get("department"),
+                "owner_role": doc.get("owner_role"),
+                "security_level": doc.get("security_level"),
+                "document_type": doc.get("document_type"),
+                "sensitivity": doc.get("sensitivity"),
+                "source_url": doc.get("source_url"),
+                "drive_id": doc.get("drive_id"),
+                "drive_item_id": doc.get("drive_item_id"),
+            }
+            for doc in full_doc_chunks
+        ]
 
     @staticmethod
     def retrieve_contract_policy(
@@ -317,166 +356,90 @@ class AzureSearchService:
         ]
 
     @staticmethod
-    def retrieve_helpdesk(
+    async def retrieve_helpdesk(
         question: str,
         top_k: int,
         group_ids: list[str],
         permissions: list[dict],
     ):
-
         client = SearchClient(
-
-            endpoint=
-            settings
-            .AZURE_SEARCH_ENDPOINT,
-
-            index_name=
-            settings
-            .AZURE_SEARCH_INDEX,
-
-            credential=
-            AzureKeyCredential(
-
-                settings
-                .AZURE_SEARCH_KEY
-
-            )
-
+            endpoint=settings.AZURE_SEARCH_ENDPOINT,
+            index_name=settings.AZURE_SEARCH_INDEX,
+            credential=AzureKeyCredential(settings.AZURE_SEARCH_KEY),
         )
-
-        openai_client = AzureOpenAI(
-
-            api_key=
-            settings
-            .AZURE_OPENAI_API_KEY,
-
-            azure_endpoint=
-            settings
-            .AZURE_OPENAI_ENDPOINT,
-
-            api_version=
-            settings
-            .AZURE_OPENAI_API_VERSION,
-
+        openai_client = AsyncAzureOpenAI(
+            api_key=settings.AZURE_OPENAI_API_KEY,
+            azure_endpoint=settings.AZURE_OPENAI_ENDPOINT,
+            api_version=settings.AZURE_OPENAI_API_VERSION,
+            max_retries=0,
         )
-
-        embedding_response = (
-
-            openai_client
-            .embeddings
-            .create(
-
-                model=
-                settings
-                .AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
-
-                input=
-                question,
-
-            )
-
-        )
-
-        query_embedding = (
-
-            embedding_response
-            .data[0]
-            .embedding
-
-        )
-
-        vector_query = (
-
-            VectorizedQuery(
-
-                vector=
-                query_embedding,
-
-                k_nearest_neighbors=
-                top_k,
-
-                fields=
-                "text_vector",
-
-            )
-
-        )
-
         acl_filter = AzureSearchService.build_acl_filter(
             group_ids=group_ids,
             permissions=permissions,
         )
-        azure_filter = (
-            "(workspace eq 'HELPDESK') "
-            f"and ({acl_filter})"
-        )
-
+        azure_filter = f"(workspace eq 'HELPDESK') and ({acl_filter})"
         logger.info("Azure Filter: %s", azure_filter)
 
-        results = client.search(
+        async with capacity_manager.search_slot():
+            try:
+                async with capacity_manager.embedding_slot():
+                    embedding_response = await retry_async(
+                        lambda: asyncio.wait_for(
+                            openai_client.embeddings.create(
+                                model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
+                                input=question,
+                            ),
+                            timeout=(
+                                settings
+                                .AZURE_OPENAI_EMBEDDING_REQUEST_TIMEOUT_SECONDS
+                            ),
+                        ),
+                        operation_name="azure_openai.helpdesk_embedding",
+                    )
+            finally:
+                await openai_client.close()
 
-            search_text=
-            question,
-
-            vector_queries=[
-                vector_query,
-            ],
-
-            filter=
-            azure_filter,
-
-            top=
-            20,
-
-        )
+            vector_query = VectorizedQuery(
+                vector=embedding_response.data[0].embedding,
+                k_nearest_neighbors=top_k,
+                fields="text_vector",
+            )
+            try:
+                results = await retry_async(
+                    lambda: asyncio.wait_for(
+                        asyncio.to_thread(
+                            lambda: list(
+                                client.search(
+                                    search_text=question,
+                                    vector_queries=[vector_query],
+                                    filter=azure_filter,
+                                    top=20,
+                                )
+                            )
+                        ),
+                        timeout=settings.AZURE_SEARCH_REQUEST_TIMEOUT_SECONDS,
+                    ),
+                    operation_name="azure_search.helpdesk",
+                )
+            finally:
+                client.close()
 
         return [
-
             {
-
-                "score":
-                doc.get("@search.score"),
-
-                "chunk_id":
-                doc.get("chunk_id"),
-
-                "parent_id":
-                doc.get("parent_id"),
-
-                "title":
-                doc.get("title"),
-
-                "content":
-                doc.get("chunk"),
-
-                "source_file":
-                doc.get("source_file"),
-
-                "department":
-                doc.get("department"),
-
-                "owner_role":
-                doc.get("owner_role"),
-
-                "security_level":
-                doc.get("security_level"),
-
-                "document_type":
-                doc.get("document_type"),
-
-                "sensitivity":
-                doc.get("sensitivity"),
-                "source_url":
-                doc.get("source_url"),
-
-                "drive_id":
-                doc.get("drive_id"),
-
-                "drive_item_id":
-                doc.get("drive_item_id"),
-
+                "score": doc.get("@search.score"),
+                "chunk_id": doc.get("chunk_id"),
+                "parent_id": doc.get("parent_id"),
+                "title": doc.get("title"),
+                "content": doc.get("chunk"),
+                "source_file": doc.get("source_file"),
+                "department": doc.get("department"),
+                "owner_role": doc.get("owner_role"),
+                "security_level": doc.get("security_level"),
+                "document_type": doc.get("document_type"),
+                "sensitivity": doc.get("sensitivity"),
+                "source_url": doc.get("source_url"),
+                "drive_id": doc.get("drive_id"),
+                "drive_item_id": doc.get("drive_item_id"),
             }
-
             for doc in results
-
         ]

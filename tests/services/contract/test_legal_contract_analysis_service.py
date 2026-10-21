@@ -2,12 +2,13 @@ import unittest
 from unittest.mock import AsyncMock, patch
 
 from backend.app.modules.configuration.enums.prompt_code import PromptCode
-from backend.app.modules.contract.services.legal_contract_analysis_service import (
+from backend.app.modules.company.contract.services.legal_contract_analysis_service import (
     LegalContractAnalysisService,
 )
-from backend.app.modules.contract.services.legal_chat_retrieval_service import (
-    LegalChatRetrievalService,
+from backend.app.modules.company.contract.services.legal_azure_search_retrieval_service import (
+    LegalAzureSearchRetrievalService,
 )
+from backend.app.shared.llm.bge_embedding import BGEEmbeddingService
 
 
 class LegalContractAnalysisServiceTest(
@@ -43,8 +44,12 @@ class LegalContractAnalysisServiceTest(
 
         self.assertEqual(len(result), 8)
         self.assertEqual(
-            result[0]["metadata_seeds"],
-            {"title": ["first", "second"]},
+            result[0]["seeds"],
+            ["first", "second"],
+        )
+        print(
+            "[TEST][LEGAL_ANALYZER] limited checks=8 and "
+            "normalized unique seeds=['first', 'second']"
         )
 
     async def test_analyze_streams_each_check_sequentially(self):
@@ -115,10 +120,21 @@ class LegalContractAnalysisServiceTest(
                 PromptCode.LEGAL_CONTRACT_REVIEWER: reviewer_prompt,
             }[prompt_code]
 
-        def retrieve(metadata_seeds):
-            document_id = (
-                "law-1" if "title" in metadata_seeds else "law-2"
-            )
+        embedded_batches = []
+
+        def embed_batch(texts):
+            embedded_batches.append(list(texts))
+            return [
+                [float(index + 1)] * 1024
+                for index, _ in enumerate(texts)
+            ]
+
+        retrieved_seed_groups = []
+
+        def retrieve(seed_vectors):
+            seeds = [item["seed"] for item in seed_vectors]
+            retrieved_seed_groups.append(seeds)
+            document_id = "law-1" if seeds == ["penalty"] else "law-2"
             return [
                 {
                     "document_id": document_id,
@@ -139,8 +155,13 @@ class LegalContractAnalysisServiceTest(
                 new=AsyncMock(side_effect=load_prompt),
             ) as load_prompt_mock,
             patch.object(
-                LegalChatRetrievalService,
-                "retrieve",
+                BGEEmbeddingService,
+                "embed_batch",
+                side_effect=embed_batch,
+            ) as embedding,
+            patch.object(
+                LegalAzureSearchRetrievalService,
+                "retrieve_with_vectors",
                 side_effect=retrieve,
             ) as retrieval,
         ):
@@ -154,7 +175,13 @@ class LegalContractAnalysisServiceTest(
             ]
 
         self.assertEqual(self.service.llm.chat_json.await_count, 3)
+        self.assertEqual(embedding.call_count, 1)
+        self.assertEqual(embedded_batches, [["penalty", "construction"]])
         self.assertEqual(retrieval.call_count, 2)
+        self.assertEqual(
+            retrieved_seed_groups,
+            [["penalty"], ["construction"]],
+        )
         self.assertEqual(load_prompt_mock.await_count, 2)
         self.assertEqual(
             load_prompt_mock.await_args_list[0].kwargs["prompt_code"],
@@ -183,6 +210,11 @@ class LegalContractAnalysisServiceTest(
         self.assertNotIn(
             "vn_text",
             events[1]["data"]["result"]["sources"][0],
+        )
+        print(
+            "[TEST][LEGAL_BATCH] embedded one batch=2 seeds; "
+            "mapping Clause A->penalty->law-1 and "
+            "Clause B->construction->law-2 preserved"
         )
 
     async def test_empty_checks_skip_retrieval_and_reviewer(self):
@@ -216,8 +248,12 @@ class LegalContractAnalysisServiceTest(
                 new=AsyncMock(return_value=analyzer_prompt),
             ) as load_prompt,
             patch.object(
-                LegalChatRetrievalService,
-                "retrieve",
+                BGEEmbeddingService,
+                "embed_batch",
+            ) as embedding,
+            patch.object(
+                LegalAzureSearchRetrievalService,
+                "retrieve_with_vectors",
             ) as retrieval,
         ):
             events = [
@@ -238,10 +274,16 @@ class LegalContractAnalysisServiceTest(
         )
         self.assertEqual(self.service.llm.chat_json.await_count, 1)
         self.assertEqual(load_prompt.await_count, 1)
+        embedding.assert_not_called()
         retrieval.assert_not_called()
+        print(
+            "[TEST][LEGAL_EMPTY] no checks; skipped BGE, Azure retrieval, "
+            "and reviewer"
+        )
 
     def test_legal_contract_top_k_is_four(self):
         self.assertEqual(
-            LegalChatRetrievalService.LEGAL_CHAT_TOP_K,
+            LegalAzureSearchRetrievalService.TOP_K,
             4,
         )
+        print("[TEST][LEGAL_RETRIEVAL] Azure Legal TOP_K=4")

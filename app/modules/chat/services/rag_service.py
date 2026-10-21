@@ -3,6 +3,7 @@ from uuid import UUID
 from typing import AsyncIterator
 
 from backend.app.core.timing import timed, logger
+from backend.app.core.settings import settings
 
 from backend.app.modules.configuration.enums.prompt_code import (
     PromptCode,
@@ -165,13 +166,18 @@ class RagService:
                     "AI Model not found."
                 )
 
+            history = (history or "")[-settings.RAG_MAX_HISTORY_CHARS:]
             contexts = []
+            context_chars = 0
 
             for chunk in chunks:
-
-                contexts.append(
-                    chunk["content"]
-                )
+                content = str(chunk.get("content") or "")
+                remaining = settings.RAG_MAX_CONTEXT_CHARS - context_chars
+                if remaining <= 0:
+                    break
+                selected = content[:remaining]
+                contexts.append(selected)
+                context_chars += len(selected)
 
             context = "\n\n".join(contexts)
 
@@ -222,7 +228,8 @@ class RagService:
                 "temperature": float(
                     model_config.temperature
                 ),
-                "max_tokens": int(
-                    model_config.max_tokens
+                "max_tokens": min(
+                    int(model_config.max_tokens),
+                    settings.RAG_MAX_OUTPUT_TOKENS,
                 ),
             }

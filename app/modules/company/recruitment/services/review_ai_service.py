@@ -4,35 +4,35 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.not_found_exception import (
+from app.core.not_found_exception import (
     NotFoundException,
 )
-from backend.app.modules.configuration.enums.prompt_code import (
+from app.modules.configuration.enums.prompt_code import (
     PromptCode,
 )
-from backend.app.modules.configuration.repositories.ai_model_repository import (
+from app.modules.configuration.repositories.ai_model_repository import (
     AIModelRepository,  
 )
-from backend.app.modules.configuration.repositories.ai_prompt_repository import (
+from app.modules.configuration.repositories.ai_prompt_repository import (
     AIPromptRepository,
 )
-from backend.app.shared.llm.azure_openai_service import (
+from app.shared.llm.azure_openai_service import (
     AzureOpenAIService,
 )
-from backend.app.modules.chat.services.prompt_builder_azure import (
+from app.modules.chat.services.prompt_builder_azure import (
     PromptBuilderAzure,
 )
 # from app.utils.extract.document_extraction import (
 #     DocumentExtractor,
 # )
 
-from backend.app.shared.azure.document_intelligent import (
+from app.shared.azure.document_intelligent import (
     DocumentExtractor,
 )
 
 
 
-from backend.app.modules.configuration.repositories.rag_config_repository import WorkspaceConfigRepository
+from app.modules.configuration.repositories.rag_config_repository import WorkspaceConfigRepository
 
 
 

@@ -1,17 +1,18 @@
 import asyncio
 import logging
 import random
+import time
 from collections.abc import Awaitable, Callable
 from typing import TypeVar
 
 from azure.core.exceptions import ServiceRequestError, ServiceResponseError
 from openai import APIConnectionError, APITimeoutError
 
-from backend.app.core.settings import settings
-from backend.app.shared.resilience.exceptions import DependencyUnavailableError
+from app.core.settings import settings
+from app.shared.resilience.exceptions import DependencyUnavailableError
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("uvicorn.error")
 T = TypeVar("T")
 
 
@@ -69,15 +70,40 @@ async def retry_async(
     operation_name: str,
 ) -> T:
     max_attempts = max(1, settings.AZURE_RETRY_MAX_ATTEMPTS)
+    overall_started = time.perf_counter()
 
     for attempt in range(1, max_attempts + 1):
+        attempt_started = time.perf_counter()
         try:
-            return await operation()
+            result = await operation()
+            logger.info(
+                "[retry_timing] operation=%s attempt=%d/%d outcome=success "
+                "request=%.3fs total=%.3fs",
+                operation_name, attempt, max_attempts,
+                time.perf_counter() - attempt_started,
+                time.perf_counter() - overall_started,
+            )
+            return result
         except Exception as exc:
+            request_duration = time.perf_counter() - attempt_started
             retryable = _is_retryable(exc)
             if not retryable:
+                logger.warning(
+                    "[retry_timing] operation=%s attempt=%d/%d outcome=not_retryable "
+                    "status=%s error_type=%s request=%.3fs total=%.3fs",
+                    operation_name, attempt, max_attempts, _status_code(exc),
+                    type(exc).__name__, request_duration,
+                    time.perf_counter() - overall_started,
+                )
                 raise
             if attempt >= max_attempts:
+                logger.warning(
+                    "[retry_timing] operation=%s attempt=%d/%d outcome=exhausted "
+                    "status=%s error_type=%s request=%.3fs total=%.3fs",
+                    operation_name, attempt, max_attempts, _status_code(exc),
+                    type(exc).__name__, request_duration,
+                    time.perf_counter() - overall_started,
+                )
                 raise DependencyUnavailableError(
                     f"{operation_name} remained unavailable after "
                     f"{max_attempts} attempts."
@@ -94,11 +120,13 @@ async def retry_async(
                 delay + random.uniform(0.0, settings.AZURE_RETRY_JITTER_SECONDS),
             )
             logger.warning(
-                "[retry] operation=%s attempt=%d/%d status=%s delay=%.3fs",
+                "[retry] operation=%s attempt=%d/%d status=%s error_type=%s request=%.3fs delay=%.3fs",
                 operation_name,
                 attempt,
                 max_attempts,
                 _status_code(exc),
+                type(exc).__name__,
+                request_duration,
                 delay,
             )
             await asyncio.sleep(delay)

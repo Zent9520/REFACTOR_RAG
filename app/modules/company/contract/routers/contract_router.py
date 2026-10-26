@@ -17,25 +17,25 @@ from fastapi import (
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.database import (
+from app.core.database import (
     get_db
 )
 from fastapi.responses import StreamingResponse
-from backend.app.modules.company.contract.contract_advanced_logging import (
+from app.modules.company.contract.contract_advanced_logging import (
     contract_split_logger,
 )
-from backend.app.modules.company.contract.services.contract_service import (
+from app.modules.company.contract.services.contract_service import (
     ContractService,
 )
-from backend.app.modules.company.contract.services.contract_advanced_service import (
+from app.modules.company.contract.services.contract_advanced_service import (
     ContractAdvancedService,
 )
-from backend.app.modules.company.contract.services.legal_chat_service import LegalChatService
-from backend.app.modules.company.contract.services.legal_contract_analysis_service import (
+from app.modules.company.contract.services.legal_chat_service import LegalChatService
+from app.modules.company.contract.services.legal_contract_analysis_service import (
     LegalContractAnalysisService,
 )
-from backend.app.modules.company.contract.schemas.contract_chat_request import ( ContractChatRequest)
-from backend.app.modules.company.contract.schemas.contract_advanced_request import (
+from app.modules.company.contract.schemas.contract_chat_request import ( ContractChatRequest)
+from app.modules.company.contract.schemas.contract_advanced_request import (
     ContractLegalReviewRequest,
     LegalChatRequest,
 )

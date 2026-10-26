@@ -1,13 +1,17 @@
 import asyncio
 import json
+import logging
+import time
 from typing import Any, AsyncIterator
 
 from openai import AsyncAzureOpenAI
 
-from backend.app.core.settings import settings
-from backend.app.shared.resilience.capacity_manager import capacity_manager
-from backend.app.shared.resilience.exceptions import DependencyUnavailableError
-from backend.app.shared.resilience.retry_policy import retry_async
+from app.core.settings import settings
+from app.shared.resilience.capacity_manager import capacity_manager
+from app.shared.resilience.exceptions import DependencyUnavailableError
+from app.shared.resilience.retry_policy import retry_async
+
+logger = logging.getLogger("uvicorn.error")
 
 
 class LLMResponseTruncatedError(ValueError):
@@ -32,6 +36,9 @@ class AzureOpenAIService:
             api_version=settings.AZURE_OPENAI_API_VERSION.strip(),
             max_retries=0,
         )
+
+    async def close(self) -> None:
+        await self._client.close()
 
     async def _create_with_limits(
         self,
@@ -68,6 +75,7 @@ class AzureOpenAIService:
         )
         return response.choices[0].message.content or ""
 
+
     async def chat_json(
         self,
         model: str,
@@ -100,12 +108,25 @@ class AzureOpenAIService:
         messages: list[dict[str, Any]],
         temperature: float = 0.2,
         max_completion_tokens: int = 2000,
+        trace_id: str | None = None,
     ) -> AsyncIterator[str]:
         max_completion_tokens = max(1, int(max_completion_tokens))
         estimated_tokens = _estimate_tokens(messages, max_completion_tokens)
+        started = time.perf_counter()
+
+        quota_wait = await capacity_manager.openai_quota.reserve(estimated_tokens)
+        logger.info(
+            "[llm_timing] trace_id=%s stage=quota_reserved wait=%.3fs estimated_tokens=%d",
+            trace_id, quota_wait, estimated_tokens,
+        )
 
         # The slot remains held until streaming finishes or the client disconnects.
-        async with capacity_manager.llm_slot(estimated_tokens):
+        async with capacity_manager.llm.slot() as slot_wait:
+            slot_acquired = time.perf_counter()
+            logger.info(
+                "[llm_timing] trace_id=%s stage=slot_acquired wait=%.3fs total_wait=%.3fs",
+                trace_id, slot_wait, slot_acquired - started,
+            )
             stream = await retry_async(
                 lambda: asyncio.wait_for(
                     self._client.chat.completions.create(
@@ -119,17 +140,28 @@ class AzureOpenAIService:
                 ),
                 operation_name="azure_openai.chat_stream.create",
             )
+            stream_created = time.perf_counter()
+            logger.info("[llm_timing] trace_id=%s stage=stream_created duration=%.3fs elapsed=%.3fs", trace_id, stream_created - slot_acquired, stream_created - started)
 
             try:
+                first_chunk = True
+                first_content = True
                 async with asyncio.timeout(
                     settings.AZURE_OPENAI_CHAT_REQUEST_TIMEOUT_SECONDS
                 ):
                     async for chunk in stream:
+                        if first_chunk:
+                            logger.info("[llm_timing] trace_id=%s stage=first_chunk after_create=%.3fs elapsed=%.3fs", trace_id, time.perf_counter() - stream_created, time.perf_counter() - started)
+                            first_chunk = False
                         if not chunk.choices:
                             continue
                         content = chunk.choices[0].delta.content
                         if content:
+                            if first_content:
+                                logger.info("[llm_timing] trace_id=%s stage=first_content after_create=%.3fs elapsed=%.3fs", trace_id, time.perf_counter() - stream_created, time.perf_counter() - started)
+                                first_content = False
                             yield content
+                logger.info("[llm_timing] trace_id=%s stage=stream_done elapsed=%.3fs", trace_id, time.perf_counter() - started)
             except TimeoutError as exc:
                 raise DependencyUnavailableError(
                     "Azure OpenAI stream exceeded its timeout."
@@ -154,3 +186,21 @@ class AzureOpenAIService:
             estimated_tokens=_estimate_tokens(messages, max_tokens),
         )
         return response.choices[0].message.content or ""
+
+
+_shared_chat_service: AzureOpenAIService | None = None
+
+
+def get_shared_chat_service() -> AzureOpenAIService:
+    global _shared_chat_service
+    if _shared_chat_service is None:
+        _shared_chat_service = AzureOpenAIService()
+    return _shared_chat_service
+
+
+async def close_shared_chat_service() -> None:
+    global _shared_chat_service
+    service = _shared_chat_service
+    _shared_chat_service = None
+    if service is not None:
+        await service.close()

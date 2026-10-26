@@ -10,7 +10,7 @@ from sqlalchemy import (
 
 )
 
-from backend.app.modules.chat.models.messages import (
+from app.modules.chat.models.messages import (
 
  Message
 

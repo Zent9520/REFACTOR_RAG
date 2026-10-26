@@ -2,39 +2,34 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 
-from backend.app.modules.chat.repositories.message_repository import (
+from app.modules.chat.repositories.message_repository import (
     MessageRepository
 )
 
 class SessionMemoryService:
     @staticmethod
+    async def get_recent_user_questions(
+        db: AsyncSession,
+        conversation_id: str,
+    ) -> list[str]:
+        messages = await MessageRepository.get_recent_message(
+            db=db, conversation_id=conversation_id, limit=3
+        )
+        return [message.content for message in messages if message.role == "user"]
+
+    @staticmethod
+    def history_after_question(recent_questions: list[str], question: str) -> str:
+        """Mirror the latest-three-user-messages query after saving question."""
+        return "\n".join((recent_questions + [question])[-3:])
+
+    @staticmethod
     async def build_context(
         db: AsyncSession,
         conversation_id: str,
     ):
-        recent_messages = await(
-            MessageRepository
-            .get_recent_message(
-                db=db,
-                conversation_id= conversation_id,
-                limit=3
-            )
-            
-        )
-        formatted_messages = []
-
-        for message in recent_messages:
-
-            if message.role != "user":
-                continue
-
-            formatted_messages.append(
-                message.content
-            )
-
-        return "\n".join(
-            formatted_messages
-        )
+        return "\n".join(await SessionMemoryService.get_recent_user_questions(
+            db=db, conversation_id=conversation_id
+        ))
         
     @staticmethod
     async def build_retrieval_query (

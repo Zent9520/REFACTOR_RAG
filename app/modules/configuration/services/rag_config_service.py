@@ -4,7 +4,9 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from backend.app.modules.configuration.repositories.rag_config_repository import (
+from app.modules.configuration.chat_config_cache import ChatConfigCache
+
+from app.modules.configuration.repositories.rag_config_repository import (
     WorkspaceConfigRepository,
 )
 
@@ -104,6 +106,7 @@ class WorkspaceConfigService:
         )
 
         await db.commit()
+        ChatConfigCache.invalidate()
 
         return {
 
@@ -135,6 +138,7 @@ class WorkspaceConfigService:
         )
 
         await db.commit()
+        ChatConfigCache.invalidate()
 
         return {
 

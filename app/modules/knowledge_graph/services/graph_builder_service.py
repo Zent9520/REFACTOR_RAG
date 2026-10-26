@@ -1,20 +1,20 @@
-from backend.app.modules.knowledge_graph.repositories.entity_repository import (
+from app.modules.knowledge_graph.repositories.entity_repository import (
     EntityRepository
 )
 
-from backend.app.modules.knowledge_graph.repositories.entity_context_repository import (
+from app.modules.knowledge_graph.repositories.entity_context_repository import (
     EntityContextRepository
 )
 
-from backend.app.modules.knowledge_graph.repositories.entity_relationship_repository import (
+from app.modules.knowledge_graph.repositories.entity_relationship_repository import (
     EntityRelationshipRepository
 )
 
-from backend.app.shared.llm.openai_embedding_service import (
+from app.shared.llm.openai_embedding_service import (
     OpenAIEmbeddingService
 )
 
-from backend.app.modules.knowledge_graph.services.embedding_builder import (
+from app.modules.knowledge_graph.services.embedding_builder import (
     EmbeddingBuilder
 )
 

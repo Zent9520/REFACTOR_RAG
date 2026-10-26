@@ -4,37 +4,39 @@ from datetime import timezone
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.modules.configuration.models.ai_model import (
+from app.modules.configuration.chat_config_cache import ChatConfigCache
+
+from app.modules.configuration.models.ai_model import (
     AIModel,
 )
 
 from uuid import UUID
 
-from backend.app.modules.configuration.repositories.ai_model_repository import (
+from app.modules.configuration.repositories.ai_model_repository import (
     AIModelRepository,
 )
 
-from backend.app.modules.configuration.schemas.create_ai_model_request import (
+from app.modules.configuration.schemas.create_ai_model_request import (
     CreateAIModelRequest,
 )
 
-from backend.app.modules.configuration.schemas.update_ai_model_request import (
+from app.modules.configuration.schemas.update_ai_model_request import (
     UpdateAIModelRequest,
 )
 
-from backend.app.modules.configuration.schemas.get_ai_model_paged_request import (
+from app.modules.configuration.schemas.get_ai_model_paged_request import (
     GetAIModelPagedRequest,
 )
 
-from backend.app.modules.configuration.schemas.update_ai_model_active_request import (
+from app.modules.configuration.schemas.update_ai_model_active_request import (
     UpdateAIModelActiveRequest,
 )
 
-from backend.app.core.bad_request_exception import (
+from app.core.bad_request_exception import (
     BadRequestException,
 )
 
-from backend.app.core.not_found_exception import (
+from app.core.not_found_exception import (
     NotFoundException,
 )
 
@@ -93,6 +95,7 @@ class ModelsService:
         )
 
         await db.commit()
+        ChatConfigCache.invalidate()
         await db.refresh(model)
 
         return model
@@ -135,6 +138,7 @@ class ModelsService:
         )
 
         await db.commit()
+        ChatConfigCache.invalidate()
         await db.refresh(model)
 
         return model
@@ -163,6 +167,7 @@ class ModelsService:
         )
 
         await db.commit()
+        ChatConfigCache.invalidate()
         await db.refresh(model)
 
         return model
@@ -193,3 +198,4 @@ class ModelsService:
             )
     
             await db.commit()
+            ChatConfigCache.invalidate()

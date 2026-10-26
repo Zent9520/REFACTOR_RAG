@@ -1,4 +1,4 @@
-from backend.app.modules.documents.prompts.sensitivity_prompt import (
+from app.modules.documents.prompts.sensitivity_prompt import (
 
     IT_SENSITIVITY_PROMPT,
 

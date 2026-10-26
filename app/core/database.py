@@ -14,16 +14,26 @@ from sqlalchemy.orm import DeclarativeBase
 
 import os
 
-from backend.app.core.settings import settings
+from app.core.settings import settings
 
 if not settings.DATABASE_URL:
     raise RuntimeError("DATABASE_URL chưa được cấu hình trong .env")
 
 
+_pool_options = (
+    {
+        "pool_size": settings.DB_POOL_SIZE,
+        "max_overflow": settings.DB_MAX_OVERFLOW,
+        "pool_timeout": settings.DB_POOL_TIMEOUT_SECONDS,
+        "pool_pre_ping": True,
+    }
+    if settings.DB_POOL_SIZE > 0 else {"poolclass": NullPool}
+)
+
 engine = create_async_engine(
 
     settings.DATABASE_URL,   # trước đây là DATABASE_URL
-    echo=True,
+    echo=settings.DB_SQL_ECHO,
 
 
     connect_args={
@@ -35,8 +45,7 @@ engine = create_async_engine(
     },
 
 
-    poolclass=
-    NullPool
+    **_pool_options
 
 )
 

@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import AsyncMock, patch
 
-from backend.app.modules.configuration.enums.prompt_code import PromptCode
-from backend.app.modules.company.contract.services.legal_chat_service import LegalChatService
+from app.modules.configuration.enums.prompt_code import PromptCode
+from app.modules.company.contract.services.legal_chat_service import LegalChatService
 
 
 class LegalChatServiceTest(unittest.IsolatedAsyncioTestCase):
@@ -104,7 +104,7 @@ class LegalChatServiceTest(unittest.IsolatedAsyncioTestCase):
                 new=AsyncMock(side_effect=load_prompt),
             ) as load_prompt_mock,
             patch(
-                "backend.app.modules.company.contract.services.legal_chat_service."
+                "app.modules.company.contract.services.legal_chat_service."
                 "LegalChatRetrievalService.retrieve",
                 return_value=[document],
             ) as retrieve,
@@ -182,7 +182,7 @@ class LegalChatServiceTest(unittest.IsolatedAsyncioTestCase):
                 new=AsyncMock(return_value=query_prompt),
             ) as load_prompt,
             patch(
-                "backend.app.modules.company.contract.services.legal_chat_service."
+                "app.modules.company.contract.services.legal_chat_service."
                 "LegalChatRetrievalService.retrieve",
                 return_value=[],
             ),

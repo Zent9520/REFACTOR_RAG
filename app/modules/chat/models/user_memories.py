@@ -8,9 +8,9 @@ from sqlalchemy import (
     DateTime,
     Enum
 )
-from backend.app.modules.chat.enums.memories import MemoryType
+from app.modules.chat.enums.memories import MemoryType
 
-from backend.app.core.database import Base
+from app.core.database import Base
 from sqlalchemy.orm import Mapped, mapped_column
 
 class UserMemory(Base):

@@ -1,9 +1,9 @@
 import unittest
 from unittest.mock import AsyncMock, patch
 
-from backend.app.core.settings import settings
-from backend.app.shared.resilience.exceptions import DependencyUnavailableError
-from backend.app.shared.resilience.retry_policy import retry_async
+from app.core.settings import settings
+from app.shared.resilience.exceptions import DependencyUnavailableError
+from app.shared.resilience.retry_policy import retry_async
 
 
 class FakeResponse:
@@ -37,7 +37,7 @@ class RetryPolicyTest(unittest.IsolatedAsyncioTestCase):
             patch.object(settings, "AZURE_RETRY_MAX_DELAY_SECONDS", 0.02),
             patch.object(settings, "AZURE_RETRY_JITTER_SECONDS", 0.0),
             patch(
-                "backend.app.shared.resilience.retry_policy.asyncio.sleep",
+                "app.shared.resilience.retry_policy.asyncio.sleep",
                 new=AsyncMock(),
             ) as sleep,
         ):
@@ -62,7 +62,7 @@ class RetryPolicyTest(unittest.IsolatedAsyncioTestCase):
             patch.object(settings, "AZURE_RETRY_MAX_DELAY_SECONDS", 0.02),
             patch.object(settings, "AZURE_RETRY_JITTER_SECONDS", 0.0),
             patch(
-                "backend.app.shared.resilience.retry_policy.asyncio.sleep",
+                "app.shared.resilience.retry_policy.asyncio.sleep",
                 new=AsyncMock(),
             ),
         ):

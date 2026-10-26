@@ -1,12 +1,12 @@
 import json
 
-from backend.app.shared.llm.llm_factory import (
+from app.shared.llm.llm_factory import (
     LLMFactory
 )
-from backend.app.shared.json_helper import (
+from app.shared.json_helper import (
     JsonHelper
 )
-from backend.app.shared.llm.llm_failover_service import (LLMFailoverService)
+from app.shared.llm.llm_failover_service import (LLMFailoverService)
 
 class EntityExtractor:
 

@@ -1,15 +1,15 @@
 import asyncio
 from datetime import datetime, timezone
 
-from backend.app.core.database import AsyncSessionLocal
-from backend.app.modules.company.recruitment.enums.review_job_status import ReviewJobStatus
-from backend.app.modules.company.recruitment.enums.review_queue import ReviewQueue
-from backend.app.modules.company.recruitment.enums.review_task_status import ReviewTaskStatus
-from backend.app.modules.company.recruitment.repositories.review_job_repository import ReviewJobRepository
-from backend.app.modules.company.recruitment.repositories.review_task_repository import ReviewTaskRepository
-from backend.app.modules.company.recruitment.services.review_ai_service import ReviewAIService
-from backend.app.shared.queue.local_queue_provider import queue_provider
-from backend.app.modules.company.recruitment.reviews.review_task_message import ReviewTaskMessage
+from app.core.database import AsyncSessionLocal
+from app.modules.company.recruitment.enums.review_job_status import ReviewJobStatus
+from app.modules.company.recruitment.enums.review_queue import ReviewQueue
+from app.modules.company.recruitment.enums.review_task_status import ReviewTaskStatus
+from app.modules.company.recruitment.repositories.review_job_repository import ReviewJobRepository
+from app.modules.company.recruitment.repositories.review_task_repository import ReviewTaskRepository
+from app.modules.company.recruitment.services.review_ai_service import ReviewAIService
+from app.shared.queue.local_queue_provider import queue_provider
+from app.modules.company.recruitment.reviews.review_task_message import ReviewTaskMessage
 
 
 async def process_review_task(message: ReviewTaskMessage) -> None:

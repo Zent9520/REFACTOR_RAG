@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from backend.app.modules.identity_access.models.tag import Tag
+from app.modules.identity_access.models.tag import Tag
 
 class TagRepository:
     @staticmethod

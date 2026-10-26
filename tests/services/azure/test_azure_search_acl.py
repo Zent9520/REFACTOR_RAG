@@ -1,6 +1,6 @@
 import unittest
 
-from backend.app.shared.azure.azure_search_service import AzureSearchService
+from app.shared.azure.azure_search_service import AzureSearchService
 
 
 class AzureSearchAclFilterTest(unittest.TestCase):

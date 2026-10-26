@@ -2,15 +2,15 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 
-from backend.app.shared.llm.ollama_service import (
+from app.shared.llm.ollama_service import (
     OllamaService
 )
 
-from backend.app.modules.chat.repositories.message_repository import (
+from app.modules.chat.repositories.message_repository import (
     MessageRepository
 )
 
-from backend.app.modules.chat.repositories.conversation_summary_repository import (
+from app.modules.chat.repositories.conversation_summary_repository import (
     ConversationSummaryRepository
 )
 

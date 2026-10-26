@@ -1,7 +1,7 @@
 import httpx
 
-from backend.app.core.settings import settings
-from backend.app.modules.documents.services.sync_state import SyncState
+from app.core.settings import settings
+from app.modules.documents.services.sync_state import SyncState
 
 
 class SharePointSyncService:

@@ -7,39 +7,39 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.settings import settings
+from app.core.settings import settings
 
-from backend.app.modules.configuration.enums.prompt_code import PromptCode
+from app.modules.configuration.enums.prompt_code import PromptCode
 
-from backend.app.modules.company.meeting.models.meeting_analysis import (
+from app.modules.company.meeting.models.meeting_analysis import (
     MeetingAnalysis,
 )
 
-from backend.app.modules.company.meeting.models.meeting_transcript import (
+from app.modules.company.meeting.models.meeting_transcript import (
     MeetingTranscript,
 )
 
-from backend.app.modules.company.meeting.repositories.meeting_analysis_repository import (
+from app.modules.company.meeting.repositories.meeting_analysis_repository import (
     MeetingAnalysisRepository,
 )
 
-from backend.app.modules.company.meeting.repositories.meeting_transcript_repository import (
+from app.modules.company.meeting.repositories.meeting_transcript_repository import (
     MeetingTranscriptRepository,
 )
 
-from backend.app.modules.configuration.repositories.ai_prompt_repository import (
+from app.modules.configuration.repositories.ai_prompt_repository import (
     AIPromptRepository,
 )
 
-from backend.app.modules.configuration.repositories.ai_model_repository import (
+from app.modules.configuration.repositories.ai_model_repository import (
     AIModelRepository,
 )
 
-from backend.app.shared.llm.azure_openai_service import (
+from app.shared.llm.azure_openai_service import (
     AzureOpenAIService,
 )
 
-from backend.app.modules.company.meeting.services.microsoft_meeting_service import (
+from app.modules.company.meeting.services.microsoft_meeting_service import (
     MicrosoftMeetingService,
 )
 

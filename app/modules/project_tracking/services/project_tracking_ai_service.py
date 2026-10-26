@@ -1,22 +1,22 @@
 import json
 
-from backend.app.modules.configuration.enums.prompt_code import (
+from app.modules.configuration.enums.prompt_code import (
     PromptCode,
 )
 
-from backend.app.modules.configuration.repositories.ai_model_repository import (
+from app.modules.configuration.repositories.ai_model_repository import (
     AIModelRepository,
 )
 
-from backend.app.modules.configuration.repositories.ai_prompt_repository import (
+from app.modules.configuration.repositories.ai_prompt_repository import (
     AIPromptRepository,
 )
 
-from backend.app.shared.llm.azure_openai_service import (
+from app.shared.llm.azure_openai_service import (
     AzureOpenAIService,
 )
-from backend.app.core.settings import settings
-from backend.app.modules.configuration.repositories.rag_config_repository import WorkspaceConfigRepository
+from app.core.settings import settings
+from app.modules.configuration.repositories.rag_config_repository import WorkspaceConfigRepository
 
 
 class ProjectTrackingAIService:

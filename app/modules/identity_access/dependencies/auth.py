@@ -8,15 +8,15 @@ from fastapi.security import HTTPBearer
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.database import get_db
+from app.core.database import get_db
 
-from backend.app.modules.identity_access.models.user_model import User
+from app.modules.identity_access.models.user_model import User
 
-from backend.app.modules.identity_access.repositories.user_repository import (
+from app.modules.identity_access.repositories.user_repository import (
     UserRepository,
 )
 
-from backend.app.modules.identity_access.services.jwt_service import (
+from app.modules.identity_access.services.jwt_service import (
     JwtService,
 )
 

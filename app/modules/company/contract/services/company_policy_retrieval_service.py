@@ -2,10 +2,10 @@ import asyncio
 from time import perf_counter
 from typing import Any
 
-from backend.app.modules.company.contract.contract_advanced_logging import (
+from app.modules.company.contract.contract_advanced_logging import (
     contract_advanced_logger as logger,
 )
-from backend.app.shared.azure.azure_search_service import (
+from app.shared.azure.azure_search_service import (
     AzureSearchService,
 )
 

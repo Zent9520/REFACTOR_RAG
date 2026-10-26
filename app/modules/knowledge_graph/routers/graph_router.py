@@ -7,14 +7,14 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 
-from backend.app.core.database import (
+from app.core.database import (
     get_db
 )
 
-from backend.app.modules.knowledge_graph.services.graph_ingestion_service import (
+from app.modules.knowledge_graph.services.graph_ingestion_service import (
     GraphIngestionService
 )
-from backend.app.modules.knowledge_graph.services.graph_visualization_service import (
+from app.modules.knowledge_graph.services.graph_visualization_service import (
     GraphVisualizationService
 )
 
@@ -24,11 +24,11 @@ from pydantic import (
 
 import asyncio
 
-from backend.app.core.database import (
+from app.core.database import (
     AsyncSessionLocal
 )
 
-from backend.app.modules.knowledge_graph.services.graph_completion_service import (
+from app.modules.knowledge_graph.services.graph_completion_service import (
     GraphCompletionService
 )
 

@@ -1,4 +1,4 @@
-from backend.app.shared.queue.queue_message import (
+from app.shared.queue.queue_message import (
     QueueMessage,
 )
 

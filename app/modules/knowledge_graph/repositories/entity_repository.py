@@ -1,10 +1,10 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.modules.knowledge_graph.models.entity import Entity
+from app.modules.knowledge_graph.models.entity import Entity
 from sqlalchemy import text
 
-from backend.app.shared.llm.openai_embedding_service import (
+from app.shared.llm.openai_embedding_service import (
     OpenAIEmbeddingService
 )
 
@@ -13,7 +13,7 @@ from sqlalchemy import (
     func
 )
 
-from backend.app.modules.knowledge_graph.models.entity_relationship import (
+from app.modules.knowledge_graph.models.entity_relationship import (
     EntityRelationship
 )
 

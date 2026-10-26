@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from backend.app.modules.identity_access.models.user_model import (
+from app.modules.identity_access.models.user_model import (
     User,
 )
 

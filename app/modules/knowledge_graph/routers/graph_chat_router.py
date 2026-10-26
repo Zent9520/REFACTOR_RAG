@@ -7,15 +7,15 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 
-from backend.app.core.database import (
+from app.core.database import (
     get_db
 )
 
-from backend.app.modules.knowledge_graph.schemas.graph_chat_request import (
+from app.modules.knowledge_graph.schemas.graph_chat_request import (
     GraphChatRequest
 )
 
-from backend.app.modules.knowledge_graph.services.graph_chat_service import (
+from app.modules.knowledge_graph.services.graph_chat_service import (
     GraphChatService
 )
 

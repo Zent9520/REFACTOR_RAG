@@ -3,19 +3,19 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 
-from backend.app.modules.identity_access.repositories.sensitivity_repository import (
+from app.modules.identity_access.repositories.sensitivity_repository import (
     SensitivityRepository
 )
 
-from backend.app.modules.chat.services.prompt_builder import (
+from app.modules.chat.services.prompt_builder import (
     PromptBuilder
 )
 
-from backend.app.shared.llm.llm_factory import (
+from app.shared.llm.llm_factory import (
     LLMFactory
 )
 
-from backend.app.shared.llm.azure_openai_service import (
+from app.shared.llm.azure_openai_service import (
     AzureOpenAIService,
 )
 

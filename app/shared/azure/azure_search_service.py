@@ -1,11 +1,11 @@
 import asyncio
 import json
 import logging
+import time
 
-from backend.app.core.timing import timed
-from azure.search.documents import (
-    SearchClient
-)
+from app.core.timing import timed
+from azure.search.documents import SearchClient as SyncSearchClient
+from azure.search.documents.aio import SearchClient as AsyncSearchClient
 
 from azure.search.documents.models import (
     VectorizedQuery
@@ -20,22 +20,104 @@ from openai import (
     AzureOpenAI,
 )
 
-from backend.app.core.settings import settings
+from app.core.settings import settings
 
-from backend.app.modules.configuration.repositories.rag_config_repository import (
+from app.modules.configuration.repositories.rag_config_repository import (
     WorkspaceConfigRepository
 )
-from backend.app.modules.configuration.enums.prompt_code import PromptCode
+from app.modules.configuration.enums.prompt_code import PromptCode
 
-from backend.app.shared.llm.azure_openai_service import AzureOpenAIService
-from backend.app.shared.resilience.capacity_manager import capacity_manager
-from backend.app.shared.resilience.retry_policy import retry_async
+from app.shared.llm.azure_openai_service import AzureOpenAIService
+from app.shared.resilience.capacity_manager import capacity_manager
+from app.shared.resilience.retry_policy import retry_async
 
 
 logger = logging.getLogger(__name__)
 
 
 class AzureSearchService:
+    _embedding_client: AsyncAzureOpenAI | None = None
+    _search_client: AsyncSearchClient | None = None
+
+    @classmethod
+    def _get_embedding_client(cls) -> AsyncAzureOpenAI:
+        if cls._embedding_client is None:
+            cls._embedding_client = AsyncAzureOpenAI(
+                api_key=settings.AZURE_OPENAI_API_KEY,
+                azure_endpoint=settings.AZURE_OPENAI_ENDPOINT,
+                api_version=settings.AZURE_OPENAI_API_VERSION,
+                max_retries=0,
+            )
+        return cls._embedding_client
+
+    @classmethod
+    def _get_search_client(cls) -> AsyncSearchClient:
+        if cls._search_client is None:
+            cls._search_client = AsyncSearchClient(
+                endpoint=settings.AZURE_SEARCH_ENDPOINT,
+                index_name=settings.AZURE_SEARCH_INDEX,
+                credential=AzureKeyCredential(settings.AZURE_SEARCH_KEY),
+            )
+        return cls._search_client
+
+    @classmethod
+    async def close_shared_clients(cls) -> None:
+        embedding_client, search_client = cls._embedding_client, cls._search_client
+        cls._embedding_client = None
+        cls._search_client = None
+        try:
+            if embedding_client is not None:
+                await embedding_client.close()
+        finally:
+            if search_client is not None:
+                await search_client.close()
+
+    @staticmethod
+    async def warm_up() -> None:
+        """Best-effort startup probes for the chat embedding and Search index."""
+        async def warm_embedding() -> None:
+            started = time.perf_counter()
+            try:
+                client = AzureSearchService._get_embedding_client()
+                async with capacity_manager.embedding_slot():
+                    await asyncio.wait_for(
+                        client.embeddings.create(
+                            model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
+                            input="warmup",
+                        ),
+                        timeout=settings.AZURE_OPENAI_EMBEDDING_REQUEST_TIMEOUT_SECONDS,
+                    )
+                logger.info("[warmup] embedding ready in %.2fs", time.perf_counter() - started)
+            except Exception:
+                logger.exception("[warmup] embedding failed")
+
+        async def warm_search() -> None:
+            started = time.perf_counter()
+            try:
+                client = AzureSearchService._get_search_client()
+                async with capacity_manager.search_slot():
+                    await asyncio.wait_for(
+                        AzureSearchService._search_async(
+                            client,
+                            search_text="*",
+                            filter="chunk_id eq '__warm_up__'",
+                            select=["chunk_id"],
+                            top=1,
+                        ),
+                        timeout=settings.AZURE_SEARCH_REQUEST_TIMEOUT_SECONDS,
+                    )
+                logger.info("[warmup] search ready in %.2fs", time.perf_counter() - started)
+            except Exception:
+                logger.exception("[warmup] search failed")
+
+        await asyncio.gather(warm_embedding(), warm_search())
+
+    @staticmethod
+    async def _search_async(client: AsyncSearchClient, **kwargs) -> list:
+        """Collect one Azure async search page without using a thread pool."""
+
+        results = await client.search(**kwargs)
+        return [document async for document in results]
 
     @staticmethod
     def _escape_odata_value(value: str) -> str:
@@ -159,11 +241,6 @@ class AzureSearchService:
         permissions: list[dict],
         rewrite_query: bool = True,
     ):
-        client = SearchClient(
-            endpoint=settings.AZURE_SEARCH_ENDPOINT,
-            index_name=settings.AZURE_SEARCH_INDEX,
-            credential=AzureKeyCredential(settings.AZURE_SEARCH_KEY),
-        )
         acl_filter = AzureSearchService.build_acl_filter(
             group_ids=group_ids,
             permissions=permissions,
@@ -175,95 +252,76 @@ class AzureSearchService:
                     question
                 )
 
-        async with capacity_manager.search_slot():
-            openai_client = AsyncAzureOpenAI(
-                api_key=settings.AZURE_OPENAI_API_KEY,
-                azure_endpoint=settings.AZURE_OPENAI_ENDPOINT,
-                api_version=settings.AZURE_OPENAI_API_VERSION,
-                max_retries=0,
-            )
-            try:
-                with timed("retrieval.embedding"):
-                    async with capacity_manager.embedding_slot():
-                        embedding_response = await retry_async(
-                            lambda: asyncio.wait_for(
-                                openai_client.embeddings.create(
-                                    model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
-                                    input=question,
-                                ),
-                                timeout=(
-                                    settings
-                                    .AZURE_OPENAI_EMBEDDING_REQUEST_TIMEOUT_SECONDS
-                                ),
-                            ),
-                            operation_name="azure_openai.embedding",
-                        )
-            finally:
-                await openai_client.close()
+        openai_client = AzureSearchService._get_embedding_client()
+        with timed("retrieval.embedding"):
+            async with capacity_manager.embedding_slot():
+                embedding_response = await retry_async(
+                    lambda: asyncio.wait_for(
+                        openai_client.embeddings.create(
+                            model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
+                            input=question,
+                        ),
+                        timeout=settings.AZURE_OPENAI_EMBEDDING_REQUEST_TIMEOUT_SECONDS,
+                    ),
+                    operation_name="azure_openai.embedding",
+                )
 
-            query_embedding = embedding_response.data[0].embedding
-            vector_query = VectorizedQuery(
-                vector=query_embedding,
-                k_nearest_neighbors=10,
-                fields="text_vector",
-            )
+        query_embedding = embedding_response.data[0].embedding
+        vector_query = VectorizedQuery(
+            vector=query_embedding,
+            k_nearest_neighbors=10,
+            fields="text_vector",
+        )
 
-            with timed("retrieval.search"):
+        client = AzureSearchService._get_search_client()
+        with timed("retrieval.search"):
+            async with capacity_manager.search_slot():
                 results = await retry_async(
                     lambda: asyncio.wait_for(
-                        asyncio.to_thread(
-                            lambda: list(
-                                client.search(
-                                    search_text=search_text_query,
-                                    vector_queries=[vector_query],
-                                    filter=acl_filter,
-                                    top=10,
-                                )
-                            )
+                        AzureSearchService._search_async(
+                            client,
+                            search_text=search_text_query,
+                            vector_queries=[vector_query],
+                            filter=acl_filter,
+                            top=10,
                         ),
                         timeout=settings.AZURE_SEARCH_REQUEST_TIMEOUT_SECONDS,
                     ),
                     operation_name="azure_search.top_chunks",
                 )
 
-            if not results:
-                client.close()
-                return []
+        if not results:
+            return []
 
-            top1 = results[0]
-            top1_parent_id = top1.get("parent_id")
-            top1_title = top1.get("title")
-            logger.info(
-                "Top chunk document: %s | parent_id: %s",
-                top1_title,
-                top1_parent_id,
-            )
-            escaped_parent_id = AzureSearchService._escape_odata_value(
-                str(top1_parent_id)
-            )
+        top1 = results[0]
+        top1_parent_id = top1.get("parent_id")
+        top1_title = top1.get("title")
+        logger.info(
+            "Top chunk document: %s | parent_id: %s",
+            top1_title,
+            top1_parent_id,
+        )
+        escaped_parent_id = AzureSearchService._escape_odata_value(
+            str(top1_parent_id)
+        )
 
-            try:
-                with timed("retrieval.document_chunks"):
-                    full_doc_chunks = await retry_async(
-                        lambda: asyncio.wait_for(
-                            asyncio.to_thread(
-                                lambda: list(
-                                    client.search(
-                                        search_text="*",
-                                        filter=(
-                                            f"(parent_id eq '{escaped_parent_id}') "
-                                            f"and ({acl_filter})"
-                                        ),
-                                        top=1000,
-                                    )
-                                )
+        with timed("retrieval.document_chunks"):
+            async with capacity_manager.search_slot():
+                full_doc_chunks = await retry_async(
+                    lambda: asyncio.wait_for(
+                        AzureSearchService._search_async(
+                            client,
+                            search_text="*",
+                            filter=(
+                                f"(parent_id eq '{escaped_parent_id}') "
+                                f"and ({acl_filter})"
                             ),
-                            timeout=settings.AZURE_SEARCH_REQUEST_TIMEOUT_SECONDS,
+                            top=1000,
                         ),
-                        operation_name="azure_search.document_chunks",
-                    )
-            finally:
-                client.close()
+                        timeout=settings.AZURE_SEARCH_REQUEST_TIMEOUT_SECONDS,
+                    ),
+                    operation_name="azure_search.document_chunks",
+                )
 
         return [
             {
@@ -294,7 +352,7 @@ class AzureSearchService:
         if not question.strip():
             return []
 
-        client = SearchClient(
+        client = SyncSearchClient(
             endpoint=settings.AZURE_SEARCH_ENDPOINT,
             index_name=settings.AZURE_SEARCH_INDEX,
             credential=AzureKeyCredential(
@@ -362,17 +420,7 @@ class AzureSearchService:
         group_ids: list[str],
         permissions: list[dict],
     ):
-        client = SearchClient(
-            endpoint=settings.AZURE_SEARCH_ENDPOINT,
-            index_name=settings.AZURE_SEARCH_INDEX,
-            credential=AzureKeyCredential(settings.AZURE_SEARCH_KEY),
-        )
-        openai_client = AsyncAzureOpenAI(
-            api_key=settings.AZURE_OPENAI_API_KEY,
-            azure_endpoint=settings.AZURE_OPENAI_ENDPOINT,
-            api_version=settings.AZURE_OPENAI_API_VERSION,
-            max_retries=0,
-        )
+        openai_client = AzureSearchService._get_embedding_client()
         acl_filter = AzureSearchService.build_acl_filter(
             group_ids=group_ids,
             permissions=permissions,
@@ -380,49 +428,38 @@ class AzureSearchService:
         azure_filter = f"(workspace eq 'HELPDESK') and ({acl_filter})"
         logger.info("Azure Filter: %s", azure_filter)
 
-        async with capacity_manager.search_slot():
-            try:
-                async with capacity_manager.embedding_slot():
-                    embedding_response = await retry_async(
-                        lambda: asyncio.wait_for(
-                            openai_client.embeddings.create(
-                                model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
-                                input=question,
-                            ),
-                            timeout=(
-                                settings
-                                .AZURE_OPENAI_EMBEDDING_REQUEST_TIMEOUT_SECONDS
-                            ),
-                        ),
-                        operation_name="azure_openai.helpdesk_embedding",
-                    )
-            finally:
-                await openai_client.close()
-
-            vector_query = VectorizedQuery(
-                vector=embedding_response.data[0].embedding,
-                k_nearest_neighbors=top_k,
-                fields="text_vector",
-            )
-            try:
-                results = await retry_async(
-                    lambda: asyncio.wait_for(
-                        asyncio.to_thread(
-                            lambda: list(
-                                client.search(
-                                    search_text=question,
-                                    vector_queries=[vector_query],
-                                    filter=azure_filter,
-                                    top=20,
-                                )
-                            )
-                        ),
-                        timeout=settings.AZURE_SEARCH_REQUEST_TIMEOUT_SECONDS,
+        async with capacity_manager.embedding_slot():
+            embedding_response = await retry_async(
+                lambda: asyncio.wait_for(
+                    openai_client.embeddings.create(
+                        model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
+                        input=question,
                     ),
-                    operation_name="azure_search.helpdesk",
-                )
-            finally:
-                client.close()
+                    timeout=settings.AZURE_OPENAI_EMBEDDING_REQUEST_TIMEOUT_SECONDS,
+                ),
+                operation_name="azure_openai.helpdesk_embedding",
+            )
+
+        vector_query = VectorizedQuery(
+            vector=embedding_response.data[0].embedding,
+            k_nearest_neighbors=top_k,
+            fields="text_vector",
+        )
+        client = AzureSearchService._get_search_client()
+        async with capacity_manager.search_slot():
+            results = await retry_async(
+                lambda: asyncio.wait_for(
+                    AzureSearchService._search_async(
+                        client,
+                        search_text=question,
+                        vector_queries=[vector_query],
+                        filter=azure_filter,
+                        top=20,
+                    ),
+                    timeout=settings.AZURE_SEARCH_REQUEST_TIMEOUT_SECONDS,
+                ),
+                operation_name="azure_search.helpdesk",
+            )
 
         return [
             {

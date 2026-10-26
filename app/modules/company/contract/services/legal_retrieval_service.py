@@ -6,10 +6,10 @@ from typing import Any
 
 import duckdb
 
-from backend.app.modules.company.contract.contract_advanced_logging import (
+from app.modules.company.contract.contract_advanced_logging import (
     contract_advanced_logger as logger,
 )
-from backend.app.core.settings import settings
+from app.core.settings import settings
 
 
 class LegalRetrievalService:

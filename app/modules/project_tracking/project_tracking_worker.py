@@ -1,10 +1,10 @@
 import asyncio
 
-from backend.app.core.database import (
+from app.core.database import (
     AsyncSessionLocal,
 )
 
-from backend.app.modules.project_tracking.services.project_tracking_sync_service import (
+from app.modules.project_tracking.services.project_tracking_sync_service import (
     ProjectTrackingSyncService,
 )
 

@@ -4,27 +4,29 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.not_found_exception import (
+from app.modules.configuration.chat_config_cache import ChatConfigCache
+
+from app.core.not_found_exception import (
     NotFoundException,
 )
 
-from backend.app.modules.configuration.models.ai_prompt import (
+from app.modules.configuration.models.ai_prompt import (
     AIPrompt,
 )
 
-from backend.app.modules.configuration.repositories.ai_prompt_repository import (
+from app.modules.configuration.repositories.ai_prompt_repository import (
     AIPromptRepository,
 )
 
-from backend.app.modules.configuration.schemas.create_ai_prompt_request import (
+from app.modules.configuration.schemas.create_ai_prompt_request import (
     CreateAIPromptRequest,
 )
 
-from backend.app.modules.configuration.schemas.update_ai_prompt_request import (
+from app.modules.configuration.schemas.update_ai_prompt_request import (
     UpdateAIPromptRequest,
 )
 
-from backend.app.modules.configuration.schemas.get_ai_prompt_paged_request import (
+from app.modules.configuration.schemas.get_ai_prompt_paged_request import (
     GetAIPromptPagedRequest,
 )
 
@@ -83,6 +85,7 @@ class AIPromptService:
         )
 
         await db.commit()
+        ChatConfigCache.invalidate()
 
         await db.refresh(
             prompt,
@@ -121,6 +124,7 @@ class AIPromptService:
         )
 
         await db.commit()
+        ChatConfigCache.invalidate()
 
         await db.refresh(
             prompt,
@@ -154,3 +158,4 @@ class AIPromptService:
         )
 
         await db.commit()
+        ChatConfigCache.invalidate()

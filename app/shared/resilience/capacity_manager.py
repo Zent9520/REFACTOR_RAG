@@ -5,8 +5,8 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from time import monotonic, perf_counter
 
-from backend.app.core.settings import settings
-from backend.app.shared.resilience.exceptions import (
+from app.core.settings import settings
+from app.shared.resilience.exceptions import (
     DependencyQueueTimeoutError,
     PipelineCapacityExceededError,
     TokenBudgetExceededError,

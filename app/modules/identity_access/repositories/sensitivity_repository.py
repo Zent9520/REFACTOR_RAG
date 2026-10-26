@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 
-from backend.app.modules.identity_access.models.sensitivity_level import (
+from app.modules.identity_access.models.sensitivity_level import (
     SensitivityLevel
 )
 

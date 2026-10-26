@@ -1,10 +1,10 @@
 import requests
 
-from backend.app.core.settings import (
+from app.core.settings import (
     settings
 )
 
-from backend.app.shared.llm.base_llm import (
+from app.shared.llm.base_llm import (
     BaseLLM
 )
 

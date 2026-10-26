@@ -2,11 +2,11 @@ from sqlalchemy import (
     select
 )
 
-from backend.app.modules.knowledge_graph.models.entity import (
+from app.modules.knowledge_graph.models.entity import (
     Entity
 )
 
-from backend.app.shared.llm.openai_embedding_service import (
+from app.shared.llm.openai_embedding_service import (
     OpenAIEmbeddingService
 )
 

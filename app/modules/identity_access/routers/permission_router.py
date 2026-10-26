@@ -7,16 +7,16 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from backend.app.core.database import (
+from app.core.database import (
     get_db,
 )
 
-from backend.app.modules.identity_access.schemas.permission_request import (
+from app.modules.identity_access.schemas.permission_request import (
     CreatePermissionRequest,
     UpdatePermissionRequest,
 )
 
-from backend.app.modules.identity_access.services.permission_service import (
+from app.modules.identity_access.services.permission_service import (
     PermissionService,
 )
 

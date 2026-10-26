@@ -1,6 +1,6 @@
 import httpx
 
-from backend.app.core.settings import (
+from app.core.settings import (
     settings
 )
 

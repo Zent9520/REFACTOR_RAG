@@ -17,34 +17,34 @@ from sqlalchemy.ext.asyncio import (
 from uuid import UUID
 
 
-from backend.app.core.database import (
+from app.core.database import (
 
  get_db
 
 )
 
 
-from backend.app.modules.chat.schemas.conversation_schema import (
+from app.modules.chat.schemas.conversation_schema import (
 
  ConversationCreate
 
 )
 
 
-from backend.app.modules.chat.services.conversation_service import (
+from app.modules.chat.services.conversation_service import (
 
  ConversationService
 
 )
 
 
-from backend.app.modules.chat.repositories.message_repository import (
+from app.modules.chat.repositories.message_repository import (
 
  MessageRepository
 
 )
 
-from backend.app.modules.chat.repositories.conversation_summary_repository import (
+from app.modules.chat.repositories.conversation_summary_repository import (
 
  ConversationSummaryRepository
 

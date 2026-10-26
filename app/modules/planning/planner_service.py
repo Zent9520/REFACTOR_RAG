@@ -4,14 +4,14 @@ import httpx
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.modules.identity_access.repositories.microsoft_account_repository import (
+from app.modules.identity_access.repositories.microsoft_account_repository import (
     MicrosoftAccountRepository,
 )
 
-from backend.app.modules.identity_access.services.microsoft_auth_service import (
+from app.modules.identity_access.services.microsoft_auth_service import (
     MicrosoftAuthService,
 )
-from backend.app.modules.identity_access.models.microsoft_account import MicrosoftAccount
+from app.modules.identity_access.models.microsoft_account import MicrosoftAccount
 
 
 class PlannerService:

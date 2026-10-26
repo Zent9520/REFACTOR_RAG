@@ -1,24 +1,24 @@
-from backend.app.modules.chat.services.message_service import (
+from app.modules.chat.services.message_service import (
     MessageService
 )
 
-from backend.app.modules.chat.services.conversation_summary_service import (
+from app.modules.chat.services.conversation_summary_service import (
     ConversationSummaryService
 )
 
-from backend.app.modules.knowledge_graph.services.graph_traversal_service import (
+from app.modules.knowledge_graph.services.graph_traversal_service import (
     GraphTraversalService
 )
 
-from backend.app.shared.llm.llm_failover_service import (
+from app.shared.llm.llm_failover_service import (
     LLMFailoverService
 )
 
-from backend.app.shared.llm.openai_service import (
+from app.shared.llm.openai_service import (
     OpenAIService
 )
 
-from backend.app.shared.json_helper import (
+from app.shared.json_helper import (
     JsonHelper
 )
 

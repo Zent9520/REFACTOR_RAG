@@ -9,23 +9,23 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from backend.app.core.database import (
+from app.core.database import (
     get_db,
 )
 
-from backend.app.modules.configuration.schemas.create_ai_prompt_request import (
+from app.modules.configuration.schemas.create_ai_prompt_request import (
     CreateAIPromptRequest,
 )
 
-from backend.app.modules.configuration.schemas.update_ai_prompt_request import (
+from app.modules.configuration.schemas.update_ai_prompt_request import (
     UpdateAIPromptRequest,
 )
 
-from backend.app.modules.configuration.schemas.get_ai_prompt_paged_request import (
+from app.modules.configuration.schemas.get_ai_prompt_paged_request import (
     GetAIPromptPagedRequest,
 )
 
-from backend.app.modules.configuration.services.ai_prompt_service import (
+from app.modules.configuration.services.ai_prompt_service import (
     AIPromptService,
 )
 

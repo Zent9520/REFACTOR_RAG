@@ -10,36 +10,36 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from backend.app.modules.executive_data.models.executive_data_dashboard import (
+from app.modules.executive_data.models.executive_data_dashboard import (
     ExecutiveDataDashboard,
 )
 
-from backend.app.modules.executive_data.models.executive_data_raw import (
+from app.modules.executive_data.models.executive_data_raw import (
     ExecutiveDataRaw,
 )
 
-from backend.app.modules.executive_data.repositories.executive_data_repository import (
+from app.modules.executive_data.repositories.executive_data_repository import (
     ExecutiveDataRepository,
 )
 
-from backend.app.modules.executive_data.services.azure_executive_data_service import (
+from app.modules.executive_data.services.azure_executive_data_service import (
     AzureExecutiveDataService,
 )
 
-from backend.app.modules.executive_data.services.executive_data_ai_service import (
+from app.modules.executive_data.services.executive_data_ai_service import (
     ExecutiveDataAIService,
 )
 
-from backend.app.modules.executive_data.services.executive_data_reader_service import (
+from app.modules.executive_data.services.executive_data_reader_service import (
     ExecutiveDataReaderService,
 )
 from uuid import UUID
 
-from backend.app.modules.configuration.enums.prompt_code import PromptCode
-from backend.app.modules.configuration.repositories.ai_model_repository import AIModelRepository
-from backend.app.modules.configuration.repositories.ai_prompt_repository import AIPromptRepository
-from backend.app.shared.llm.azure_openai_service import AzureOpenAIService
-from backend.app.modules.configuration.repositories.rag_config_repository import WorkspaceConfigRepository
+from app.modules.configuration.enums.prompt_code import PromptCode
+from app.modules.configuration.repositories.ai_model_repository import AIModelRepository
+from app.modules.configuration.repositories.ai_prompt_repository import AIPromptRepository
+from app.shared.llm.azure_openai_service import AzureOpenAIService
+from app.modules.configuration.repositories.rag_config_repository import WorkspaceConfigRepository
 
 class ExecutiveDataSyncService:
 

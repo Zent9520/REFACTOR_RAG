@@ -1,23 +1,23 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.modules.identity_access.models.role import (
+from app.modules.identity_access.models.role import (
     Role,
 )
 
-from backend.app.modules.identity_access.models.department import (
+from app.modules.identity_access.models.department import (
     Department,
 )
 
-from backend.app.modules.identity_access.models.position_level import (
+from app.modules.identity_access.models.position_level import (
     PositionLevel,
 )
 
-from backend.app.modules.identity_access.models.sensitivity_level import (
+from app.modules.identity_access.models.sensitivity_level import (
     SensitivityLevel,
 )
 
-from backend.app.modules.identity_access.models.department_sensitivity_permission import (
+from app.modules.identity_access.models.department_sensitivity_permission import (
     DepartmentSensitivityPermission,
 )
 

@@ -4,11 +4,11 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.not_found_exception import (
+from app.core.not_found_exception import (
     NotFoundException,
 )
 
-from backend.app.modules.documents.repositories.workspace_source_config_repository import (
+from app.modules.documents.repositories.workspace_source_config_repository import (
     WorkspaceSourceConfigRepository,
 )
 

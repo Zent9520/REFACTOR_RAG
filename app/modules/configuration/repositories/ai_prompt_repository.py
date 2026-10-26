@@ -10,12 +10,12 @@ from sqlalchemy import select
 from sqlalchemy import update
 from sqlalchemy import delete
 
-from backend.app.modules.configuration.models.ai_prompt import (
+from app.modules.configuration.models.ai_prompt import (
     AIPrompt
 )
 from uuid import UUID
 
-from backend.app.modules.configuration.enums.prompt_code import PromptCode
+from app.modules.configuration.enums.prompt_code import PromptCode
 
 
 class AIPromptRepository:

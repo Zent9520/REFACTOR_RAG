@@ -10,17 +10,17 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from backend.app.core.database import (
+from app.core.database import (
     get_db,
 )
 
-from backend.app.modules.company.meeting.services.meeting_service import (
+from app.modules.company.meeting.services.meeting_service import (
     MeetingService,
 )
-from backend.app.modules.company.meeting.schemas.analyze_meeting_request import (
+from app.modules.company.meeting.schemas.analyze_meeting_request import (
     AnalyzeMeetingRequest,
 )
-from backend.app.modules.company.meeting.services.meeting_analysis_service import (
+from app.modules.company.meeting.services.meeting_analysis_service import (
     MeetingAnalysisService,
 )
 

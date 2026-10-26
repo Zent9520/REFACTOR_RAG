@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from backend.app.modules.identity_access.repositories.department_repository import (
+from app.modules.identity_access.repositories.department_repository import (
     DepartmentRepository,
 )
 

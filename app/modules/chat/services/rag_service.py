@@ -2,20 +2,20 @@ import time
 from uuid import UUID
 from typing import AsyncIterator
 
-from backend.app.core.timing import timed, logger
-from backend.app.core.settings import settings
+from app.core.timing import timed, logger
+from app.core.settings import settings
 
-from backend.app.modules.configuration.enums.prompt_code import (
+from app.modules.configuration.enums.prompt_code import (
     PromptCode,
 )
 
-from backend.app.modules.configuration.chat_config_cache import ChatConfigCache
+from app.modules.configuration.chat_config_cache import ChatConfigCache
 
-from backend.app.shared.llm.azure_openai_service import (
+from app.shared.llm.azure_openai_service import (
     get_shared_chat_service,
 )
 
-from backend.app.modules.chat.services.session_memory_service import (
+from app.modules.chat.services.session_memory_service import (
     SessionMemoryService,
 )
 

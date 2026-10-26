@@ -1,4 +1,4 @@
-from backend.app.modules.chat.repositories.message_repository import MessageRepository
+from app.modules.chat.repositories.message_repository import MessageRepository
 
 
 class MessageService:

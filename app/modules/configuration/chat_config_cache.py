@@ -8,12 +8,12 @@ from uuid import UUID
 
 from sqlalchemy import select
 
-from backend.app.core.database import AsyncSessionLocal
-from backend.app.modules.configuration.models.ai_model import AIModel
-from backend.app.modules.configuration.models.ai_prompt import AIPrompt
-from backend.app.modules.configuration.models.workspace import Workspace
-from backend.app.modules.configuration.models.workspace_model_config import WorkspaceModelConfig
-from backend.app.modules.configuration.models.workspace_rag_config import WorkspaceRagConfig
+from app.core.database import AsyncSessionLocal
+from app.modules.configuration.models.ai_model import AIModel
+from app.modules.configuration.models.ai_prompt import AIPrompt
+from app.modules.configuration.models.workspace import Workspace
+from app.modules.configuration.models.workspace_model_config import WorkspaceModelConfig
+from app.modules.configuration.models.workspace_rag_config import WorkspaceRagConfig
 
 
 logger = logging.getLogger(__name__)

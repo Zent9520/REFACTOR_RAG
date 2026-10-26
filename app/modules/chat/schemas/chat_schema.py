@@ -13,7 +13,7 @@ from typing import Optional
 
 from uuid import UUID
 
-from backend.app.modules.configuration.enums.prompt_code import ( PromptCode)
+from app.modules.configuration.enums.prompt_code import ( PromptCode)
 
 
 class ChatRequest(

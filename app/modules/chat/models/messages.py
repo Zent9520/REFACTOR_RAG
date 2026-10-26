@@ -15,7 +15,7 @@ from sqlalchemy.orm import (
     mapped_column
 )
 
-from backend.app.core.database import Base
+from app.core.database import Base
 
 
 class Message(Base):

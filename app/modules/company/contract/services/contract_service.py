@@ -2,27 +2,27 @@ import json
 from zipfile import Path
 from pathlib import Path
 
-from backend.app.shared.azure.document_extraction import (
+from app.shared.azure.document_extraction import (
     DocumentExtraction,
     DocumentExtractor,
 )
 
-from backend.app.modules.configuration.repositories.ai_model_repository import (
+from app.modules.configuration.repositories.ai_model_repository import (
     AIModelRepository,
 )
 
-from backend.app.modules.configuration.repositories.ai_prompt_repository import (
+from app.modules.configuration.repositories.ai_prompt_repository import (
     AIPromptRepository,
 )
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from backend.app.modules.configuration.enums.prompt_code import (
+from app.modules.configuration.enums.prompt_code import (
     PromptCode,
 )
 
-from backend.app.shared.llm.azure_openai_service import (
+from app.shared.llm.azure_openai_service import (
     AzureOpenAIService,
 )
 
@@ -31,15 +31,15 @@ from datetime import datetime, timezone
 
 from uuid import UUID
 
-from backend.app.core.settings import (
+from app.core.settings import (
     settings,)
 
 
 
-from backend.app.modules.company.contract.models.contract_raw import ContractRaw
-from backend.app.modules.company.contract.repositories.contract_repository import ContractRepository
-from backend.app.modules.company.contract.models.contract_dashboard import ContractDashboard
-from backend.app.modules.configuration.repositories.rag_config_repository import WorkspaceConfigRepository
+from app.modules.company.contract.models.contract_raw import ContractRaw
+from app.modules.company.contract.repositories.contract_repository import ContractRepository
+from app.modules.company.contract.models.contract_dashboard import ContractDashboard
+from app.modules.configuration.repositories.rag_config_repository import WorkspaceConfigRepository
 
 
 class ContractService:
@@ -287,7 +287,7 @@ Nội dung hợp đồng:
         return item
 
         
-    from backend.app.modules.company.contract.models.contract_dashboard import (
+    from app.modules.company.contract.models.contract_dashboard import (
     ContractDashboard,
 )
 

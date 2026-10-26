@@ -7,47 +7,47 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 
-from backend.app.core.database import (
+from app.core.database import (
     get_db
 )
 
-from backend.app.modules.identity_access.repositories.role_repository import (
+from app.modules.identity_access.repositories.role_repository import (
     RoleRepository
 )
 
-from backend.app.core.settings import (
+from app.core.settings import (
     settings
 )
 
-from backend.app.modules.chat.services.conversation_service import (
+from app.modules.chat.services.conversation_service import (
     ConversationService
 )
 
-from backend.app.modules.identity_access.repositories.permission_repository import (
+from app.modules.identity_access.repositories.permission_repository import (
     PermissionRepository
 )
 
-from backend.app.modules.chat.services.session_memory_service import (
+from app.modules.chat.services.session_memory_service import (
     SessionMemoryService
 )
 
-from backend.app.modules.chat.services.query_rewrite_service import (
+from app.modules.chat.services.query_rewrite_service import (
     QueryRewriteService
 )
 
-from backend.app.shared.azure.azure_search_service import (
+from app.shared.azure.azure_search_service import (
     AzureSearchService
 )
 
-from backend.app.modules.chat.services.message_service import (
+from app.modules.chat.services.message_service import (
     MessageService
 )
 
-from backend.app.modules.chat.services.rag_service import (
+from app.modules.chat.services.rag_service import (
     RagService
 )
 
-from backend.app.modules.chat.services.conversation_summary_service import (
+from app.modules.chat.services.conversation_summary_service import (
     ConversationSummaryService
 )
 

@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.database import get_db
+from app.core.database import get_db
 
-from backend.app.modules.identity_access.schemas.tag_schema import (
+from app.modules.identity_access.schemas.tag_schema import (
     TagCreate, 
     TagResponse
 )
 
-from backend.app.modules.identity_access.repositories.tag_repository import (
+from app.modules.identity_access.repositories.tag_repository import (
     TagRepository
 )
 router = APIRouter(

@@ -6,7 +6,7 @@ from botbuilder.core import (
 
 )
 
-from backend.app.modules.chat.services.rag_service import (
+from app.modules.chat.services.rag_service import (
     RagService
 )
 

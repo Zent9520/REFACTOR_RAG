@@ -2,11 +2,11 @@ import json
 import unittest
 from unittest.mock import AsyncMock, patch
 
-from backend.app.modules.configuration.enums.prompt_code import PromptCode
-from backend.app.modules.company.contract.services.contract_advanced_service import (
+from app.modules.configuration.enums.prompt_code import PromptCode
+from app.modules.company.contract.services.contract_advanced_service import (
     ContractAdvancedService,
 )
-from backend.app.shared.llm.azure_openai_service import (
+from app.shared.llm.azure_openai_service import (
     LLMResponseTruncatedError,
 )
 
@@ -118,12 +118,12 @@ class ContractAdvancedServiceTest(unittest.IsolatedAsyncioTestCase):
 
         with (
             patch(
-                "backend.app.modules.company.contract.services.contract_advanced_service."
+                "app.modules.company.contract.services.contract_advanced_service."
                 "AIModelRepository.get_by_id",
                 new=AsyncMock(return_value=model),
             ),
             patch(
-                "backend.app.modules.company.contract.services.contract_advanced_service."
+                "app.modules.company.contract.services.contract_advanced_service."
                 "WorkspaceConfigRepository."
                 "get_model_config_by_workspace_code",
                 new=AsyncMock(return_value=model_config),
@@ -144,12 +144,12 @@ class ContractAdvancedServiceTest(unittest.IsolatedAsyncioTestCase):
                 new=AsyncMock(return_value=object()),
             ),
             patch(
-                "backend.app.modules.company.contract.services.contract_advanced_service."
+                "app.modules.company.contract.services.contract_advanced_service."
                 "CompanyPolicyRetrievalService.retrieve",
                 new=AsyncMock(return_value=company_data),
             ) as company_retrieve,
             patch(
-                "backend.app.modules.company.contract.services.contract_advanced_service."
+                "app.modules.company.contract.services.contract_advanced_service."
                 "LegalRetrievalService.retrieve_async",
                 new=AsyncMock(return_value=legal_data),
             ) as legal_retrieve,
@@ -409,7 +409,7 @@ class ContractAdvancedServiceTest(unittest.IsolatedAsyncioTestCase):
         self.service.llm.chat_json.return_value = "{}"
 
         with patch(
-            "backend.app.modules.company.contract.services.contract_advanced_service."
+            "app.modules.company.contract.services.contract_advanced_service."
             "AIPromptRepository.get_by_code",
             new=AsyncMock(return_value=prompt),
         ):
@@ -446,7 +446,7 @@ class ContractAdvancedServiceTest(unittest.IsolatedAsyncioTestCase):
         )
 
         with patch(
-            "backend.app.modules.company.contract.services.contract_advanced_service."
+            "app.modules.company.contract.services.contract_advanced_service."
             "AIPromptRepository.get_by_code",
             new=AsyncMock(return_value=prompt),
         ):

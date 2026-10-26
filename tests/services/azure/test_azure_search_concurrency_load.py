@@ -17,9 +17,9 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from backend.app.core.settings import settings
-from backend.app.shared.resilience.capacity_manager import CapacityManager
-import backend.app.shared.azure.azure_search_service as search_module
+from app.core.settings import settings
+from app.shared.resilience.capacity_manager import CapacityManager
+import app.shared.azure.azure_search_service as search_module
 
 
 class LoadMetrics:

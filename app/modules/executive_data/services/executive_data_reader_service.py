@@ -1,6 +1,6 @@
 import httpx
 
-from backend.app.modules.documents.services.sharepoint_service import (
+from app.modules.documents.services.sharepoint_service import (
     SharePointService,
 )
 

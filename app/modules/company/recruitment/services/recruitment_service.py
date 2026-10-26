@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 
-from backend.app.modules.company.recruitment.repositories.recruitment_campaign_repository import (
+from app.modules.company.recruitment.repositories.recruitment_campaign_repository import (
     RecruitmentCampaignRepository
 )
 
@@ -12,27 +12,27 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.not_found_exception import (
+from app.core.not_found_exception import (
     NotFoundException,
 )
 
-from backend.app.modules.company.recruitment.repositories.recruitment_campaign_repository import (
+from app.modules.company.recruitment.repositories.recruitment_campaign_repository import (
     RecruitmentCampaignRepository,
 )
 
-from backend.app.modules.configuration.repositories.ai_model_repository import (
+from app.modules.configuration.repositories.ai_model_repository import (
     AIModelRepository,
 )
 
-from backend.app.modules.configuration.repositories.rag_config_repository import (
+from app.modules.configuration.repositories.rag_config_repository import (
     WorkspaceConfigRepository,
 )
 
-from backend.app.shared.llm.azure_openai_service import (
+from app.shared.llm.azure_openai_service import (
     AzureOpenAIService,
 )
 
-from backend.app.modules.configuration.enums.prompt_code import (
+from app.modules.configuration.enums.prompt_code import (
     PromptCode,
 )
 

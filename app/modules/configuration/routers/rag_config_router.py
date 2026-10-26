@@ -9,14 +9,14 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from backend.app.core.database import (
+from app.core.database import (
     get_db,
 )
 
-from backend.app.modules.configuration.services.rag_config_service import (
+from app.modules.configuration.services.rag_config_service import (
     WorkspaceConfigService,
 )
-from backend.app.modules.configuration.schemas.rag_config import UpdateWorkspaceModelConfigRequest, UpdateWorkspaceRagConfigRequest
+from app.modules.configuration.schemas.rag_config import UpdateWorkspaceModelConfigRequest, UpdateWorkspaceRagConfigRequest
 
 router = APIRouter(
     prefix="/workspace-config",

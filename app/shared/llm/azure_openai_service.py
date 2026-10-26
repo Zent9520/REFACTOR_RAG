@@ -6,10 +6,10 @@ from typing import Any, AsyncIterator
 
 from openai import AsyncAzureOpenAI
 
-from backend.app.core.settings import settings
-from backend.app.shared.resilience.capacity_manager import capacity_manager
-from backend.app.shared.resilience.exceptions import DependencyUnavailableError
-from backend.app.shared.resilience.retry_policy import retry_async
+from app.core.settings import settings
+from app.shared.resilience.capacity_manager import capacity_manager
+from app.shared.resilience.exceptions import DependencyUnavailableError
+from app.shared.resilience.retry_policy import retry_async
 
 logger = logging.getLogger("uvicorn.error")
 

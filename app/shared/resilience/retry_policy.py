@@ -8,8 +8,8 @@ from typing import TypeVar
 from azure.core.exceptions import ServiceRequestError, ServiceResponseError
 from openai import APIConnectionError, APITimeoutError
 
-from backend.app.core.settings import settings
-from backend.app.shared.resilience.exceptions import DependencyUnavailableError
+from app.core.settings import settings
+from app.shared.resilience.exceptions import DependencyUnavailableError
 
 
 logger = logging.getLogger("uvicorn.error")

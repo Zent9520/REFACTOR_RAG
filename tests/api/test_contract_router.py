@@ -7,21 +7,21 @@ from uuid import uuid4
 from fastapi import HTTPException, UploadFile
 from starlette.responses import StreamingResponse
 
-from backend.app.modules.company.contract.routers.contract_router import (
+from app.modules.company.contract.routers.contract_router import (
     analyze_contract_advanced,
     analyze_contract_advanced_company_rule,
     analyze_contract_advanced_legal,
     legal_chat,
 )
-from backend.app.modules.company.contract.schemas.contract_advanced_request import (
+from app.modules.company.contract.schemas.contract_advanced_request import (
     ContractLegalReviewRequest,
     LegalChatRequest,
 )
-from backend.app.modules.company.contract.services.legal_chat_service import LegalChatService
-from backend.app.modules.company.contract.services.legal_contract_analysis_service import (
+from app.modules.company.contract.services.legal_chat_service import LegalChatService
+from app.modules.company.contract.services.legal_contract_analysis_service import (
     LegalContractAnalysisService,
 )
-from backend.app.modules.company.contract.services.contract_advanced_service import (
+from app.modules.company.contract.services.contract_advanced_service import (
     ContractAdvancedService,
 )
 

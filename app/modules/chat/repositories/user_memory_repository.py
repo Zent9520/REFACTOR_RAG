@@ -6,11 +6,11 @@ from sqlalchemy import (
     select
 )
 
-from backend.app.modules.chat.models.user_memories import (
+from app.modules.chat.models.user_memories import (
     UserMemory
 )
 
-from backend.app.modules.chat.enums.memories import (
+from app.modules.chat.enums.memories import (
     MemoryType
 )
 

@@ -4,7 +4,7 @@ from sqlalchemy import (
     select
 )
 
-from backend.app.modules.documents.models.sync_jobs import (
+from app.modules.documents.models.sync_jobs import (
     SyncJob
     
 )

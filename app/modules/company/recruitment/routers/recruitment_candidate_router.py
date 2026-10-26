@@ -7,7 +7,7 @@ from fastapi import (
 )
 
 
-from backend.app.modules.company.recruitment.schemas.create_review_request import (
+from app.modules.company.recruitment.schemas.create_review_request import (
     CreateReviewRequest,
 )
 
@@ -17,48 +17,48 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 
-from backend.app.core.database import (
+from app.core.database import (
     get_db
 )
 
-from backend.app.modules.company.recruitment.schemas.recruitment_schema import (
+from app.modules.company.recruitment.schemas.recruitment_schema import (
     RecruitmentCampaignCreate,
     RecruitmentCampaignResponse,
     RecruitmentCampaignCreateResponse,
     
 )
 
-from backend.app.modules.company.recruitment.schemas.recruit_campaign_chat_request import (
+from app.modules.company.recruitment.schemas.recruit_campaign_chat_request import (
 
 RecruitmentCampaignChatRequest
 
 )
 
-from backend.app.modules.company.recruitment.services.recruitment_service import (
+from app.modules.company.recruitment.services.recruitment_service import (
     RecruitmentService
 )
 
 
-from backend.app.modules.company.recruitment.services.recruitment_campaign_service import (
+from app.modules.company.recruitment.services.recruitment_campaign_service import (
     RecruitmentCampaignService
 )
 
 
-from backend.app.modules.company.recruitment.services.upload_candidate import (
+from app.modules.company.recruitment.services.upload_candidate import (
     UploadCandidateService,
 )
-from backend.app.modules.company.recruitment.services.analyze_candidate_service import (
+from app.modules.company.recruitment.services.analyze_candidate_service import (
     AnalyzeCandidateService,
 )
-from backend.app.modules.company.recruitment.schemas.analyze_candidate_request import (
+from app.modules.company.recruitment.schemas.analyze_candidate_request import (
     AnalyzeCandidateRequest,
 )
 
-from backend.app.modules.company.recruitment.services.review_service import (
+from app.modules.company.recruitment.services.review_service import (
     ReviewService,
 )
-from backend.app.core.settings import settings
-from backend.app.core.not_found_exception import NotFoundException
+from app.core.settings import settings
+from app.core.not_found_exception import NotFoundException
 
 router = APIRouter(
     prefix="/recruitments",
@@ -113,7 +113,7 @@ async def analyze_candidate(
 
     return result
 
-from backend.app.modules.company.recruitment.schemas.review_dto import (
+from app.modules.company.recruitment.schemas.review_dto import (
     ReviewResponse,
 )
 

@@ -5,27 +5,27 @@ from fastapi import Depends
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.database import (
+from app.core.database import (
     get_db,
 )
 
-from backend.app.modules.configuration.services.model_service import (
+from app.modules.configuration.services.model_service import (
     ModelsService,
 )
 
-from backend.app.modules.configuration.schemas.create_ai_model_request import (
+from app.modules.configuration.schemas.create_ai_model_request import (
     CreateAIModelRequest,
 )
 
-from backend.app.modules.configuration.schemas.update_ai_model_request import (
+from app.modules.configuration.schemas.update_ai_model_request import (
     UpdateAIModelRequest,
 )
 
-from backend.app.modules.configuration.schemas.get_ai_model_paged_request import (
+from app.modules.configuration.schemas.get_ai_model_paged_request import (
     GetAIModelPagedRequest,
 )
 
-from backend.app.modules.configuration.schemas.update_ai_model_active_request import (
+from app.modules.configuration.schemas.update_ai_model_active_request import (
     UpdateAIModelActiveRequest,
 )
 

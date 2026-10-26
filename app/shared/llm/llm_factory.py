@@ -1,8 +1,8 @@
-from backend.app.shared.llm.ollama_service import (
+from app.shared.llm.ollama_service import (
     OllamaService
 )
 
-from backend.app.shared.llm.openai_service import (
+from app.shared.llm.openai_service import (
     OpenAIService
 )
 

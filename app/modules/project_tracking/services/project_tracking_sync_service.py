@@ -1,11 +1,11 @@
-from backend.app.modules.project_tracking.services.azure_project_tracking_service import (
+from app.modules.project_tracking.services.azure_project_tracking_service import (
     AzureProjectTrackingService,
 )
 
-from backend.app.modules.project_tracking.services.project_tracking_reader_service import (
+from app.modules.project_tracking.services.project_tracking_reader_service import (
     ProjectTrackingReaderService,
 )
-from backend.app.modules.project_tracking.services.project_tracking_ai_service import ProjectTrackingAIService
+from app.modules.project_tracking.services.project_tracking_ai_service import ProjectTrackingAIService
 
 import hashlib
 import json
@@ -15,15 +15,15 @@ from datetime import (
     timezone,
 )
 
-from backend.app.modules.project_tracking.models.project_tracking_raw import (
+from app.modules.project_tracking.models.project_tracking_raw import (
     ProjectTrackingRaw,
 )
 
-from backend.app.modules.project_tracking.repositories.project_tracking_raw_repository import (
+from app.modules.project_tracking.repositories.project_tracking_raw_repository import (
     ProjectTrackingRawRepository,
 )
-from backend.app.modules.project_tracking.models.project_tracking_dashboard import ProjectTrackingDashboard
-from backend.app.modules.project_tracking.repositories.project_tracking_dashboard_repository import ProjectTrackingDashboardRepository
+from app.modules.project_tracking.models.project_tracking_dashboard import ProjectTrackingDashboard
+from app.modules.project_tracking.repositories.project_tracking_dashboard_repository import ProjectTrackingDashboardRepository
 
 
 

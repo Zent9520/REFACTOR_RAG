@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.modules.documents.repositories.sharepoint_delta_state_repository import SharePointDeltaRepository
-from backend.app.modules.documents.services.sharepoint_service import SharePointService
+from app.modules.documents.repositories.sharepoint_delta_state_repository import SharePointDeltaRepository
+from app.modules.documents.services.sharepoint_service import SharePointService
 
 
 class DeltaService:

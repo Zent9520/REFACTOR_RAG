@@ -1,6 +1,6 @@
 import asyncio
 
-from backend.app.core.settings import settings
+from app.core.settings import settings
 from urllib.parse import urlencode
 import httpx
 import jwt
@@ -11,7 +11,7 @@ from datetime import (
 )
 from uuid import UUID
 
-from backend.app.modules.identity_access.schemas.microsoft_profile import (
+from app.modules.identity_access.schemas.microsoft_profile import (
     MicrosoftGroup,
     MicrosoftProfile,
 )

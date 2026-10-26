@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from backend.app.modules.project_tracking.repositories.project_tracking_raw_repository import (
+from app.modules.project_tracking.repositories.project_tracking_raw_repository import (
     ProjectTrackingRawRepository,
 )
 
@@ -10,24 +10,24 @@ import json
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.modules.configuration.enums.prompt_code import PromptCode
+from app.modules.configuration.enums.prompt_code import PromptCode
 
-from backend.app.modules.configuration.repositories.ai_prompt_repository import (
+from app.modules.configuration.repositories.ai_prompt_repository import (
     AIPromptRepository,
 )
 
-from backend.app.shared.llm.ollama_service import (
+from app.shared.llm.ollama_service import (
     OllamaService,
 )
 
-from backend.app.shared.llm.azure_openai_service import (
+from app.shared.llm.azure_openai_service import (
     AzureOpenAIService,
 )
 from uuid import UUID
 
-from backend.app.modules.configuration.repositories.ai_model_repository import ( AIModelRepository)
-from backend.app.core.settings import settings
-from backend.app.modules.configuration.repositories.rag_config_repository import WorkspaceConfigRepository
+from app.modules.configuration.repositories.ai_model_repository import ( AIModelRepository)
+from app.core.settings import settings
+from app.modules.configuration.repositories.rag_config_repository import WorkspaceConfigRepository
 
 
 class TrackingTaskService:

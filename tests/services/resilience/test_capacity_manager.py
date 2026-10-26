@@ -2,13 +2,13 @@ import asyncio
 import unittest
 from unittest.mock import patch
 
-from backend.app.core.settings import settings
-from backend.app.shared.resilience.capacity_manager import (
+from app.core.settings import settings
+from app.shared.resilience.capacity_manager import (
     CapacityManager,
     OpenAIQuotaBudget,
     TimedSemaphore,
 )
-from backend.app.shared.resilience.exceptions import (
+from app.shared.resilience.exceptions import (
     DependencyQueueTimeoutError,
     PipelineCapacityExceededError,
     UserCapacityExceededError,

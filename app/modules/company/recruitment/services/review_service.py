@@ -1,51 +1,51 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.not_found_exception import (
+from app.core.not_found_exception import (
     NotFoundException,
 )
 
-from backend.app.modules.company.recruitment.enums.review_job_status import (
+from app.modules.company.recruitment.enums.review_job_status import (
     ReviewJobStatus,
 )
 
-from backend.app.modules.company.recruitment.enums.review_task_status import (
+from app.modules.company.recruitment.enums.review_task_status import (
     ReviewTaskStatus,
 )
 
-from backend.app.modules.company.recruitment.schemas.create_review_request import (
+from app.modules.company.recruitment.schemas.create_review_request import (
     CreateReviewRequest,
 )
 
-from backend.app.modules.company.recruitment.schemas.review_dto import (
+from app.modules.company.recruitment.schemas.review_dto import (
     ReviewResponse,
     ReviewFileResponse,
 )
 
-from backend.app.modules.company.recruitment.models.review_job import (
+from app.modules.company.recruitment.models.review_job import (
     ReviewJob,
 )
 
-from backend.app.modules.company.recruitment.models.review_task import (
+from app.modules.company.recruitment.models.review_task import (
     ReviewTask,
 )
 
-from backend.app.modules.configuration.repositories.ai_model_repository import (
+from app.modules.configuration.repositories.ai_model_repository import (
     AIModelRepository,
 )
 
-from backend.app.modules.company.recruitment.repositories.review_job_repository import (
+from app.modules.company.recruitment.repositories.review_job_repository import (
     ReviewJobRepository,
 )
 
-from backend.app.modules.company.recruitment.repositories.review_task_repository import (
+from app.modules.company.recruitment.repositories.review_task_repository import (
     ReviewTaskRepository,
 )
 
-from backend.app.modules.company.recruitment.services.review_ai_service import (
+from app.modules.company.recruitment.services.review_ai_service import (
     ReviewAIService,
 )
 
-from backend.app.modules.company.recruitment.services.temp_file_service import (
+from app.modules.company.recruitment.services.temp_file_service import (
     TempFileService,
 )
 

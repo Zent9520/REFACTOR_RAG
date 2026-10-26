@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from backend.app.core.database import Base
+from app.core.database import Base
 
 
 class DepartmentSensitivityPermission(Base):

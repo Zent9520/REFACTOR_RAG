@@ -18,7 +18,7 @@ from sqlalchemy.dialects.postgresql import (
     UUID as PG_UUID
 )
 
-from backend.app.core.database import Base
+from app.core.database import Base
 
 
 class ConversationSummary(Base):

@@ -2,97 +2,97 @@ from fastapi import FastAPI
 import logging
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from backend.app.modules.configuration.chat_config_cache import ChatConfigCache
-from backend.app.shared.azure.azure_search_service import AzureSearchService
-from backend.app.shared.llm.azure_openai_service import close_shared_chat_service, get_shared_chat_service
-from backend.app.shared.resilience.exceptions import (
+from app.modules.configuration.chat_config_cache import ChatConfigCache
+from app.shared.azure.azure_search_service import AzureSearchService
+from app.shared.llm.azure_openai_service import close_shared_chat_service, get_shared_chat_service
+from app.shared.resilience.exceptions import (
     CapacityError,
     DependencyQueueTimeoutError,
     TokenBudgetExceededError,
 )
-import backend.app.models_registry # noqa: F401
+import app.models_registry # noqa: F401
 
 import asyncio
 
-from backend.app.modules.documents.sharepoint_delta_worker import (
+from app.modules.documents.sharepoint_delta_worker import (
     sharepoint_delta_worker,
 )
-from backend.app.modules.company.meeting.meeting_analysis_worker import (
+from app.modules.company.meeting.meeting_analysis_worker import (
     MeetingAnalysisWorker,
 )
 
-from backend.app.modules.identity_access.routers.role_router import router as role_router
-from backend.app.modules.identity_access.routers.tag_router import router as tag_router
+from app.modules.identity_access.routers.role_router import router as role_router
+from app.modules.identity_access.routers.tag_router import router as tag_router
 
-from backend.app.modules.identity_access.routers.tag_role_rule_router import (
+from app.modules.identity_access.routers.tag_role_rule_router import (
     router as tag_role_rule_router
 )
-from backend.app.modules.identity_access.routers.policy_router import (
+from app.modules.identity_access.routers.policy_router import (
     router as policy_router
 )
-from backend.app.modules.documents.routers.chunk_router import (
+from app.modules.documents.routers.chunk_router import (
     router as chunk_router
 )
 
-from backend.app.modules.chat.routers.chat_router import (
+from app.modules.chat.routers.chat_router import (
     router as chat_router
 )
 
-from backend.app.modules.identity_access.routers.permission_router import (
+from app.modules.identity_access.routers.permission_router import (
     router as permission_router
 )
-from backend.app.modules.team_bot.bot_router import (
+from app.modules.team_bot.bot_router import (
 
     router as bot_router
 
 )
-from backend.app.modules.chat.routers.conversation_router import (
+from app.modules.chat.routers.conversation_router import (
     router as conversation
 )
-from backend.app.modules.documents.routers.document_router import (
+from app.modules.documents.routers.document_router import (
     router as document_router
 )
-from backend.app.modules.knowledge_graph.routers.graph_router import (
+from app.modules.knowledge_graph.routers.graph_router import (
     router as graph_router
 )
-from backend.app.modules.knowledge_graph.routers.graph_chat_router import (
+from app.modules.knowledge_graph.routers.graph_chat_router import (
     router as graph_chat_router
 )
-from backend.app.modules.company.recruitment.routers.recruitment_candidate_router import (
+from app.modules.company.recruitment.routers.recruitment_candidate_router import (
     router as recruitment_candidate_router
 )  
 
-from backend.app.modules.configuration.routers.model_router import (
+from app.modules.configuration.routers.model_router import (
     router as model_router
 ) 
 
-from backend.app.modules.identity_access.routers.auth_router import (
+from app.modules.identity_access.routers.auth_router import (
     router as auth_router
 )
 
-from backend.app.modules.planning.planner_router import (
+from app.modules.planning.planner_router import (
     router as planner_router
 )
-from backend.app.modules.configuration.routers.prompt_router import (
+from app.modules.configuration.routers.prompt_router import (
     router as prompt_router
 )
 
-from backend.app.modules.company.contract.routers.contract_router import (
+from app.modules.company.contract.routers.contract_router import (
     router as contract_router)
 
-from backend.app.modules.project_tracking.project_tracking_worker import (
+from app.modules.project_tracking.project_tracking_worker import (
     ProjectTrackingWorker,
 )
 
-from backend.app.modules.documents.routers.workspace_source_config_router import (
+from app.modules.documents.routers.workspace_source_config_router import (
     router as workspace_source_config_router,
 )
 
-from backend.app.modules.configuration.routers.rag_config_router import (
+from app.modules.configuration.routers.rag_config_router import (
     router as rag_config_router,
 )
 
-from backend.app.modules.company.meeting.routers.meeting_router import (
+from app.modules.company.meeting.routers.meeting_router import (
     router as meeting_router,
 )
 
@@ -104,8 +104,8 @@ from fastapi.middleware.cors import (
 
 
 
-from backend.app.shared.queue.queue_consumer import start_queue_consumers
-from backend.app.modules.executive_data.executive_data_worker import ExecutiveDataWorker
+from app.shared.queue.queue_consumer import start_queue_consumers
+from app.modules.executive_data.executive_data_worker import ExecutiveDataWorker
 
 
 
@@ -327,7 +327,7 @@ app.add_middleware(
 #         ExecutiveDataWorker.run(),
 #     )
 
-#uvicorn backend.app.main:app --reload
+#uvicorn app.main:app --reload
 
 
 app.include_router(role_router)

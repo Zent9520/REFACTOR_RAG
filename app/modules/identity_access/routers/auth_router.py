@@ -4,13 +4,13 @@ from fastapi import Query
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.database import get_db
+from app.core.database import get_db
 
-from backend.app.modules.identity_access.schemas.auth import LoginResponse
+from app.modules.identity_access.schemas.auth import LoginResponse
 
-from backend.app.modules.identity_access.services.auth_service import AuthService
+from app.modules.identity_access.services.auth_service import AuthService
 
-from backend.app.modules.identity_access.services.microsoft_auth_service import (
+from app.modules.identity_access.services.microsoft_auth_service import (
     MicrosoftAuthService,
 )
 

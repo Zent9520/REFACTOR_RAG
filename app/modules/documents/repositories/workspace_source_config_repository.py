@@ -8,19 +8,19 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from backend.app.modules.configuration.models.workspace import (
+from app.modules.configuration.models.workspace import (
     Workspace,
 )
 
-from backend.app.modules.documents.models.data_source_mode import (
+from app.modules.documents.models.data_source_mode import (
     DataSourceMode,
 )
-from backend.app.modules.documents.models.document_type import (
+from app.modules.documents.models.document_type import (
     DocumentType,
     )
 
 
-from backend.app.modules.configuration.models.workspace_source_config import (
+from app.modules.configuration.models.workspace_source_config import (
     WorkspaceSourceConfig,
 )
 

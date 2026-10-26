@@ -1,6 +1,6 @@
 from openai import AsyncOpenAI
 
-from backend.app.core.settings import (
+from app.core.settings import (
     settings
 )
 

@@ -1,14 +1,14 @@
 import unittest
 from unittest.mock import AsyncMock, patch
 
-from backend.app.modules.configuration.enums.prompt_code import PromptCode
-from backend.app.modules.company.contract.services.legal_contract_analysis_service import (
+from app.modules.configuration.enums.prompt_code import PromptCode
+from app.modules.company.contract.services.legal_contract_analysis_service import (
     LegalContractAnalysisService,
 )
-from backend.app.modules.company.contract.services.legal_azure_search_retrieval_service import (
+from app.modules.company.contract.services.legal_azure_search_retrieval_service import (
     LegalAzureSearchRetrievalService,
 )
-from backend.app.shared.llm.bge_embedding import BGEEmbeddingService
+from app.shared.llm.bge_embedding import BGEEmbeddingService
 
 
 class LegalContractAnalysisServiceTest(

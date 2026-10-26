@@ -7,19 +7,19 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 
-from backend.app.core.database import (
+from app.core.database import (
     get_db
 )
 
-from backend.app.modules.documents.repositories.chunk_repository import (
+from app.modules.documents.repositories.chunk_repository import (
     ChunkRepository
 )
 
-from backend.app.modules.documents.repositories.azure_chunk_repository import (
+from app.modules.documents.repositories.azure_chunk_repository import (
     AzureChunkRepository
 )
 
-from backend.app.modules.documents.services.chunk_processor import (
+from app.modules.documents.services.chunk_processor import (
     ChunkProcessor
 )
 import json

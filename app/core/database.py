@@ -14,7 +14,7 @@ from sqlalchemy.orm import DeclarativeBase
 
 import os
 
-from backend.app.core.settings import settings
+from app.core.settings import settings
 
 if not settings.DATABASE_URL:
     raise RuntimeError("DATABASE_URL chưa được cấu hình trong .env")

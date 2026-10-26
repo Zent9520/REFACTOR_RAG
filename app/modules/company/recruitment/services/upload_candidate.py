@@ -4,13 +4,13 @@ from uuid import UUID
 from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.bad_request_exception import (
+from app.core.bad_request_exception import (
     BadRequestException,
 )
-from backend.app.modules.company.recruitment.repositories.recruitment_candidate_repository import (
+from app.modules.company.recruitment.repositories.recruitment_candidate_repository import (
     RecruitmentCandidateRepository,
 )
-from backend.app.shared.storage.supabase_storage import (
+from app.shared.storage.supabase_storage import (
     SupabaseStorage,
 )
 

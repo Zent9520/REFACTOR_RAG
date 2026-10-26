@@ -6,22 +6,22 @@ from datetime import (
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.modules.identity_access.models.user_model import User
-from backend.app.modules.identity_access.models.microsoft_account import MicrosoftAccount
+from app.modules.identity_access.models.user_model import User
+from app.modules.identity_access.models.microsoft_account import MicrosoftAccount
 
-from backend.app.modules.identity_access.repositories.user_repository import UserRepository
-from backend.app.modules.identity_access.repositories.microsoft_account_repository import (
+from app.modules.identity_access.repositories.user_repository import UserRepository
+from app.modules.identity_access.repositories.microsoft_account_repository import (
     MicrosoftAccountRepository,
 )
 
-from backend.app.modules.identity_access.schemas.auth import LoginResponse, LoginUserResponse
-from backend.app.modules.identity_access.schemas.microsoft_profile import MicrosoftProfile
+from app.modules.identity_access.schemas.auth import LoginResponse, LoginUserResponse
+from app.modules.identity_access.schemas.microsoft_profile import MicrosoftProfile
 
-from backend.app.modules.identity_access.services.microsoft_auth_service import (
+from app.modules.identity_access.services.microsoft_auth_service import (
     MicrosoftAuthService,
 )
 
-from backend.app.modules.identity_access.services.jwt_service import JwtService
+from app.modules.identity_access.services.jwt_service import JwtService
 
 
 class AuthService:

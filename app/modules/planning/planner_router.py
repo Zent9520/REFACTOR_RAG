@@ -3,23 +3,23 @@ from fastapi import Depends
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.database import (
+from app.core.database import (
     get_db,
 )
 
-from backend.app.modules.identity_access.dependencies.auth import (
+from app.modules.identity_access.dependencies.auth import (
     get_current_user,
 )
 
-from backend.app.modules.identity_access.models.user_model import User
+from app.modules.identity_access.models.user_model import User
 
-from backend.app.modules.planning.planner_service import (
+from app.modules.planning.planner_service import (
     PlannerService,
 )
 
 from fastapi.responses import RedirectResponse
 
-from backend.app.modules.company.meeting.services.google_calendar_service import (
+from app.modules.company.meeting.services.google_calendar_service import (
     GoogleCalendarService,
 )
 

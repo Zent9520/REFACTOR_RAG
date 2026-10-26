@@ -10,73 +10,73 @@ from fastapi import (
 import asyncio
 from uuid import UUID
 from pydantic import BaseModel
-from backend.app.shared.azure.preview_document_service import (
+from app.shared.azure.preview_document_service import (
     PreviewDocumentService
 )
 
-from backend.app.modules.documents.services.sharepoint_service import (
+from app.modules.documents.services.sharepoint_service import (
     SharePointService
 )
 from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
-from backend.app.core.database import (
+from app.core.database import (
     get_db
 )
 
-from backend.app.core.settings import (
+from app.core.settings import (
     settings
 )
 
-from backend.app.modules.documents.services.sync_state import (
+from app.modules.documents.services.sync_state import (
      SyncState
 )
 
 import httpx
 
 
-from backend.app.modules.documents.services.sharepoint_service import (
+from app.modules.documents.services.sharepoint_service import (
     SharePointService
 )
 
-from backend.app.modules.documents.repositories.chunk_repository import (
+from app.modules.documents.repositories.chunk_repository import (
     ChunkRepository
 )
 
-from backend.app.modules.documents.services.chunk_processor import (
+from app.modules.documents.services.chunk_processor import (
     ChunkProcessor
 )
 
-from backend.app.modules.documents.repositories.azure_chunk_repository import (
+from app.modules.documents.repositories.azure_chunk_repository import (
     AzureChunkRepository
 )
 
-from backend.app.modules.documents.repositories.workspace_source_config_repository import (
+from app.modules.documents.repositories.workspace_source_config_repository import (
     WorkspaceSourceConfigRepository )
 
-from backend.app.modules.documents.services.delta_service import (
+from app.modules.documents.services.delta_service import (
    DeltaService
 )
-from backend.app.modules.knowledge_graph.services.graph_ingestion_service import (
+from app.modules.knowledge_graph.services.graph_ingestion_service import (
     GraphIngestionService
 )
 
-from backend.app.modules.project_tracking.services.tracking_task_service import ( TrackingTaskService )
+from app.modules.project_tracking.services.tracking_task_service import ( TrackingTaskService )
 
-from backend.app.modules.project_tracking.services.azure_project_tracking_service import AzureProjectTrackingService
-from backend.app.modules.project_tracking.services.project_tracking_reader_service import ProjectTrackingReaderService
-from backend.app.modules.project_tracking.services.project_tracking_sync_service import ProjectTrackingSyncService
+from app.modules.project_tracking.services.azure_project_tracking_service import AzureProjectTrackingService
+from app.modules.project_tracking.services.project_tracking_reader_service import ProjectTrackingReaderService
+from app.modules.project_tracking.services.project_tracking_sync_service import ProjectTrackingSyncService
 
-from backend.app.core.database import (
+from app.core.database import (
     get_db,
     AsyncSessionLocal
 )
 
 import json
 
-from backend.app.modules.project_tracking.schemas.tracking_chat_request import TrackingChatRequest
-from backend.app.modules.executive_data.services.executive_data_sync_service import ExecutiveDataSyncService
-from backend.app.modules.configuration.schemas.execute_schema import ExecutiveDataRequest, ExecutiveDataChatRequest
+from app.modules.project_tracking.schemas.tracking_chat_request import TrackingChatRequest
+from app.modules.executive_data.services.executive_data_sync_service import ExecutiveDataSyncService
+from app.modules.configuration.schemas.execute_schema import ExecutiveDataRequest, ExecutiveDataChatRequest
 
 
 router = APIRouter(

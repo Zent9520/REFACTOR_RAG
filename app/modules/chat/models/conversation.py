@@ -14,7 +14,7 @@ from datetime import datetime
 
 from uuid import uuid4
 
-from backend.app.core.database import Base
+from app.core.database import Base
 
 from sqlalchemy.dialects.postgresql import UUID
 

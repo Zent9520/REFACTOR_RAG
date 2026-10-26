@@ -1,22 +1,22 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.modules.chat.services.prompt_builder import (
+from app.modules.chat.services.prompt_builder import (
     PromptBuilder
 )
 
-from backend.app.shared.llm.llm_factory import (
+from app.shared.llm.llm_factory import (
     LLMFactory
 )
 
-from backend.app.shared.llm.response_parser import (
+from app.shared.llm.response_parser import (
     ResponseParser
 )
 
-from backend.app.modules.identity_access.repositories.tag_repository import (
+from app.modules.identity_access.repositories.tag_repository import (
     TagRepository
 )
 
-from backend.app.modules.identity_access.repositories.role_repository import (
+from app.modules.identity_access.repositories.role_repository import (
     RoleRepository
 )
 

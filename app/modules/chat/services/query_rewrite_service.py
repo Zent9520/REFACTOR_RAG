@@ -2,8 +2,8 @@ import asyncio
 import logging
 
 from openai import AsyncAzureOpenAI
-from backend.app.core.settings import settings
-from backend.app.core.timing import timed
+from app.core.settings import settings
+from app.core.timing import timed
 
 logger = logging.getLogger(__name__)
 

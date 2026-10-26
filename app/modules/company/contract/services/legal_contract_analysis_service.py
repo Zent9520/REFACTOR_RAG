@@ -6,18 +6,18 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.modules.company.contract.contract_advanced_logging import contract_split_logger
-from backend.app.modules.configuration.enums.prompt_code import PromptCode
-from backend.app.modules.configuration.repositories.ai_model_repository import AIModelRepository
-from backend.app.modules.configuration.repositories.ai_prompt_repository import AIPromptRepository
-from backend.app.modules.configuration.repositories.rag_config_repository import (
+from app.modules.company.contract.contract_advanced_logging import contract_split_logger
+from app.modules.configuration.enums.prompt_code import PromptCode
+from app.modules.configuration.repositories.ai_model_repository import AIModelRepository
+from app.modules.configuration.repositories.ai_prompt_repository import AIPromptRepository
+from app.modules.configuration.repositories.rag_config_repository import (
     WorkspaceConfigRepository,
 )
-from backend.app.modules.company.contract.services.legal_azure_search_retrieval_service import (
+from app.modules.company.contract.services.legal_azure_search_retrieval_service import (
     LegalAzureSearchRetrievalService,
 )
-from backend.app.shared.llm.azure_openai_service import AzureOpenAIService
-from backend.app.shared.llm.bge_embedding import BGEEmbeddingService
+from app.shared.llm.azure_openai_service import AzureOpenAIService
+from app.shared.llm.bge_embedding import BGEEmbeddingService
 
 
 class LegalContractAnalysisService:

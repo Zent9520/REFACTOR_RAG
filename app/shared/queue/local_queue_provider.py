@@ -1,12 +1,12 @@
-from backend.app.shared.queue.queue_manager import (
+from app.shared.queue.queue_manager import (
     queue_manager,
 )
 
-from backend.app.shared.queue.queue_message import (
+from app.shared.queue.queue_message import (
     QueueMessage,
 )
 
-from backend.app.shared.queue.queue_provider import (
+from app.shared.queue.queue_provider import (
     QueueProvider,
 )
 

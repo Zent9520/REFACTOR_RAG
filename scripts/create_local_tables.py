@@ -1,7 +1,7 @@
 import asyncio
 
-import backend.app.models_registry  # noqa: F401
-from backend.app.core.database import Base, engine
+import app.models_registry  # noqa: F401
+from app.core.database import Base, engine
 
 
 async def main() -> None:

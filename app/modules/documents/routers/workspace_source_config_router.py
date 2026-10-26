@@ -5,12 +5,12 @@ from fastapi import Depends
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.database import get_db
+from app.core.database import get_db
 
-from backend.app.modules.configuration.services.workspace_service import (
+from app.modules.configuration.services.workspace_service import (
     WorkspaceSourceConfigService,
 )
-from backend.app.modules.configuration.schemas.workspace_schema import UpdateAllowOverrideRequest, UpdateSourceModeRequest
+from app.modules.configuration.schemas.workspace_schema import UpdateAllowOverrideRequest, UpdateSourceModeRequest
 
 router = APIRouter(
 

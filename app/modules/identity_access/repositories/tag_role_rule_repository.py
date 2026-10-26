@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from backend.app.modules.identity_access.models.tag_role_rule import TagRoleRule
+from app.modules.identity_access.models.tag_role_rule import TagRoleRule
 
 class TagRoleRuleRepository:
     @staticmethod

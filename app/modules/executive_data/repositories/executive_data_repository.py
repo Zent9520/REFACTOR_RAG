@@ -7,11 +7,11 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from backend.app.modules.executive_data.models.executive_data_dashboard import (
+from app.modules.executive_data.models.executive_data_dashboard import (
     ExecutiveDataDashboard,
 )
 
-from backend.app.modules.executive_data.models.executive_data_raw import (
+from app.modules.executive_data.models.executive_data_raw import (
     ExecutiveDataRaw,
 )
 from uuid import UUID

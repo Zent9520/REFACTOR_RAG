@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import (
 
 import json
 
-from backend.app.modules.documents.services.sensitivity_classifier import (
+from app.modules.documents.services.sensitivity_classifier import (
     SensitivityClassifier,
 )
 

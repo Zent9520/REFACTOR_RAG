@@ -1,4 +1,4 @@
-from backend.app.modules.chat.repositories.conversation_repository import (
+from app.modules.chat.repositories.conversation_repository import (
 
  ConversationRepository
 

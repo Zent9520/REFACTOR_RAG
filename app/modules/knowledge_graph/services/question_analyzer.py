@@ -1,6 +1,6 @@
 import json
 
-from backend.app.shared.llm.llm_factory import (
+from app.shared.llm.llm_factory import (
     LLMFactory
 )
 

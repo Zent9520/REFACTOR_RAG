@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.modules.knowledge_graph.models.entity_context import (
+from app.modules.knowledge_graph.models.entity_context import (
     EntityContext
 )
 from sqlalchemy import text

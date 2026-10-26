@@ -3,7 +3,7 @@ import json
 import logging
 import time
 
-from backend.app.core.timing import timed
+from app.core.timing import timed
 from azure.search.documents import SearchClient as SyncSearchClient
 from azure.search.documents.aio import SearchClient as AsyncSearchClient
 
@@ -20,16 +20,16 @@ from openai import (
     AzureOpenAI,
 )
 
-from backend.app.core.settings import settings
+from app.core.settings import settings
 
-from backend.app.modules.configuration.repositories.rag_config_repository import (
+from app.modules.configuration.repositories.rag_config_repository import (
     WorkspaceConfigRepository
 )
-from backend.app.modules.configuration.enums.prompt_code import PromptCode
+from app.modules.configuration.enums.prompt_code import PromptCode
 
-from backend.app.shared.llm.azure_openai_service import AzureOpenAIService
-from backend.app.shared.resilience.capacity_manager import capacity_manager
-from backend.app.shared.resilience.retry_policy import retry_async
+from app.shared.llm.azure_openai_service import AzureOpenAIService
+from app.shared.resilience.capacity_manager import capacity_manager
+from app.shared.resilience.retry_policy import retry_async
 
 
 logger = logging.getLogger(__name__)

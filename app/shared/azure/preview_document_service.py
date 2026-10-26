@@ -1,6 +1,6 @@
 import httpx
 
-from backend.app.core.settings import settings
+from app.core.settings import settings
 
 
 class PreviewDocumentService:

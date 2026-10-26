@@ -1,8 +1,8 @@
 import httpx
 
-from backend.app.core.settings import settings
+from app.core.settings import settings
 
-from backend.app.modules.documents.services.sharepoint_service import (
+from app.modules.documents.services.sharepoint_service import (
     SharePointService,
 )
 

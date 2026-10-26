@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.database import get_db
-from backend.app.modules.identity_access.schemas.role_schema import (
+from app.core.database import get_db
+from app.modules.identity_access.schemas.role_schema import (
     RoleCreate,
     RoleResponse
 )
-from backend.app.modules.identity_access.repositories.role_repository import (
+from app.modules.identity_access.repositories.role_repository import (
     RoleRepository
 )
 

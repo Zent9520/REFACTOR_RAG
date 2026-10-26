@@ -4,30 +4,30 @@ from fastapi.responses import StreamingResponse
 
 from sqlalchemy.ext.asyncio import (AsyncSession)
 
-from backend.app.core.database import (get_db)
+from app.core.database import (get_db)
 
 from uuid import uuid4
 
-from backend.app.modules.chat.schemas.chat_schema import (ChatRequest,)
+from app.modules.chat.schemas.chat_schema import (ChatRequest,)
 
-from backend.app.shared.azure.azure_search_service import (AzureSearchService)
+from app.shared.azure.azure_search_service import (AzureSearchService)
 
-from backend.app.modules.chat.services.rag_service import (RagService)
+from app.modules.chat.services.rag_service import (RagService)
 
-from backend.app.modules.configuration.enums.prompt_code import (PromptCode)
+from app.modules.configuration.enums.prompt_code import (PromptCode)
 
 import json
 import asyncio
 import logging
 import time
 
-from backend.app.modules.configuration.chat_config_cache import ChatConfigCache
+from app.modules.configuration.chat_config_cache import ChatConfigCache
 
-from backend.app.modules.identity_access.services.permission_service import (
+from app.modules.identity_access.services.permission_service import (
     PermissionService,
 )
-from backend.app.shared.resilience.capacity_manager import capacity_manager
-from backend.app.shared.resilience.exceptions import (
+from app.shared.resilience.capacity_manager import capacity_manager
+from app.shared.resilience.exceptions import (
     CapacityError,
     PipelineCapacityExceededError,
     UserCapacityExceededError,

@@ -1,4 +1,4 @@
-from backend.app.shared.queue.local_queue import (
+from app.shared.queue.local_queue import (
     LocalQueue,
 )
 

@@ -9,11 +9,12 @@ class ConversationService:
     async def create(
         db,
         title: str,
-        email: str | None = None
+        email: str | None = None,
+        conversation_id: UUID | None = None,
     ):
         return await ConversationRepository.create(
             db,
-            conversation_id=uuid4(),
+            conversation_id=conversation_id or uuid4(),
             title=title,
             email=email
         )

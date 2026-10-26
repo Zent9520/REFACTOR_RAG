@@ -4,6 +4,8 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.app.modules.configuration.chat_config_cache import ChatConfigCache
+
 from backend.app.core.not_found_exception import (
     NotFoundException,
 )
@@ -83,6 +85,7 @@ class AIPromptService:
         )
 
         await db.commit()
+        ChatConfigCache.invalidate()
 
         await db.refresh(
             prompt,
@@ -121,6 +124,7 @@ class AIPromptService:
         )
 
         await db.commit()
+        ChatConfigCache.invalidate()
 
         await db.refresh(
             prompt,
@@ -154,3 +158,4 @@ class AIPromptService:
         )
 
         await db.commit()
+        ChatConfigCache.invalidate()

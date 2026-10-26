@@ -4,6 +4,8 @@ from datetime import timezone
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.app.modules.configuration.chat_config_cache import ChatConfigCache
+
 from backend.app.modules.configuration.models.ai_model import (
     AIModel,
 )
@@ -93,6 +95,7 @@ class ModelsService:
         )
 
         await db.commit()
+        ChatConfigCache.invalidate()
         await db.refresh(model)
 
         return model
@@ -135,6 +138,7 @@ class ModelsService:
         )
 
         await db.commit()
+        ChatConfigCache.invalidate()
         await db.refresh(model)
 
         return model
@@ -163,6 +167,7 @@ class ModelsService:
         )
 
         await db.commit()
+        ChatConfigCache.invalidate()
         await db.refresh(model)
 
         return model
@@ -193,3 +198,4 @@ class ModelsService:
             )
     
             await db.commit()
+            ChatConfigCache.invalidate()

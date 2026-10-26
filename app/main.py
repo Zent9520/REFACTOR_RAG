@@ -1,6 +1,10 @@
 from fastapi import FastAPI
+import logging
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from backend.app.modules.configuration.chat_config_cache import ChatConfigCache
+from backend.app.shared.azure.azure_search_service import AzureSearchService
+from backend.app.shared.llm.azure_openai_service import close_shared_chat_service, get_shared_chat_service
 from backend.app.shared.resilience.exceptions import (
     CapacityError,
     DependencyQueueTimeoutError,
@@ -142,6 +146,35 @@ app = FastAPI(
     ]
 
 )
+
+
+@app.on_event("startup")
+async def warm_chat_config_cache():
+    try:
+        await ChatConfigCache.refresh()
+    except Exception:
+        logging.getLogger(__name__).exception(
+            "Chat configuration cache warm-up failed; first chat will retry"
+        )
+
+
+@app.on_event("startup")
+async def warm_chat_azure():
+    # Run after startup without delaying readiness if Azure is slow or unavailable.
+    get_shared_chat_service()  # Construct the chat client without spending tokens.
+    app.state.chat_azure_warmup_task = asyncio.create_task(AzureSearchService.warm_up())
+
+
+@app.on_event("shutdown")
+async def stop_chat_azure_warmup():
+    task = getattr(app.state, "chat_azure_warmup_task", None)
+    if task is not None and not task.done():
+        task.cancel()
+        await asyncio.gather(task, return_exceptions=True)
+    try:
+        await AzureSearchService.close_shared_clients()
+    finally:
+        await close_shared_chat_service()
 
 
 @app.exception_handler(RequestValidationError)

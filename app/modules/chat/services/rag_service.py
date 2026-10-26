@@ -9,29 +9,20 @@ from backend.app.modules.configuration.enums.prompt_code import (
     PromptCode,
 )
 
-from backend.app.modules.configuration.repositories.ai_model_repository import (
-    AIModelRepository,
-)
-
-from backend.app.modules.configuration.repositories.ai_prompt_repository import (
-    AIPromptRepository,
-)
+from backend.app.modules.configuration.chat_config_cache import ChatConfigCache
 
 from backend.app.shared.llm.azure_openai_service import (
-    AzureOpenAIService,
+    get_shared_chat_service,
 )
 
 from backend.app.modules.chat.services.session_memory_service import (
     SessionMemoryService,
 )
 
-from backend.app.modules.configuration.repositories.rag_config_repository import WorkspaceConfigRepository
-
-
 class RagService:
 
     def __init__(self):
-        self.llm = AzureOpenAIService()
+        self.llm = get_shared_chat_service()
 
     async def ask(
         self,
@@ -39,7 +30,7 @@ class RagService:
         conversation_id: UUID,
         question: str,
         chunks: list,
-        model_id: UUID,
+        model_id: UUID | str,
         mode: PromptCode,
         workspace_code: str,
     ):
@@ -70,9 +61,11 @@ class RagService:
         conversation_id: UUID,
         question: str,
         chunks: list,
-        model_id: UUID,
+        model_id: UUID | str,
         mode: PromptCode,
         workspace_code: str,
+        history: str | None = None,
+        trace_id: str | None = None,
     ) -> AsyncIterator[str]:
 
         if mode == PromptCode.INTERNAL and not chunks:
@@ -89,6 +82,7 @@ class RagService:
                 model_id=model_id,
                 mode=mode,
                 workspace_code=workspace_code,
+                history=history,
             )
 
         start = time.perf_counter()
@@ -99,6 +93,7 @@ class RagService:
             messages=chat_params["messages"],
             temperature=chat_params["temperature"],
             max_completion_tokens=chat_params["max_tokens"],
+            trace_id=trace_id,
         ):
             if first_token:
                 logger.info(
@@ -119,21 +114,22 @@ class RagService:
         conversation_id: UUID,
         question: str,
         chunks: list,
-        model_id: UUID,
+        model_id: UUID | str,
         mode: PromptCode,
         workspace_code: str,
+        history: str | None = None,
     ):
 
         with timed("build_params.TOTAL"):
 
-            with timed("db.history"):
-                history = await (
-                    SessionMemoryService
-                    .build_context(
-                        db=db,
-                        conversation_id=conversation_id,
-                    )
-                )
+            if history is None:
+                with timed("db.history"):
+                    with timed("db.history.connection"):
+                        await db.connection()
+                    with timed("db.history.query"):
+                        history = await SessionMemoryService.build_context(
+                            db=db, conversation_id=conversation_id
+                        )
 
             if mode not in [
                 PromptCode.PUBLIC,
@@ -143,23 +139,13 @@ class RagService:
 
                 raise Exception("Invalid chat mode.")
 
-            with timed("db.prompt"):
-                prompt = await AIPromptRepository.get_by_code(
-                    db=db,
-                    code=mode,
+            with timed("config.lookup"):
+                prompt, model, model_config = await ChatConfigCache.get_chat_settings(
+                    mode.value, model_id, workspace_code
                 )
 
             if prompt is None:
                 raise Exception("Prompt not found.")
-
-            with timed("db.model"):
-                model = await (
-                    AIModelRepository
-                    .get_by_id(
-                        db=db,
-                        id=model_id,
-                    )
-                )
 
             if model is None:
                 raise Exception(
@@ -182,7 +168,7 @@ class RagService:
             context = "\n\n".join(contexts)
 
             system_prompt = (
-                prompt.system_prompt
+                prompt
                 .replace(
                     "{{history}}",
                     history or "",
@@ -212,15 +198,6 @@ class RagService:
                 len(history or ""),
                 len(system_prompt),
             )
-
-            with timed("db.model_config"):
-                model_config = await (
-                    WorkspaceConfigRepository
-                    .get_model_config_by_workspace_code(
-                        db=db,
-                        workspace_code=workspace_code,
-                    )
-                )
 
             return {
                 "model": model.model_name,

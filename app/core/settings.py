@@ -15,6 +15,10 @@ class Settings(BaseSettings):
 
 
     DATABASE_URL: str | None = None
+    DB_POOL_SIZE: int = 0
+    DB_MAX_OVERFLOW: int = 5
+    DB_POOL_TIMEOUT_SECONDS: float = 5.0
+    DB_SQL_ECHO: bool = True
     SUPABASE_URL: str | None = None
     SUPABASE_ANON_KEY: str | None = None
     OPENAI_API_KEY: str | None = None
@@ -131,14 +135,17 @@ class Settings(BaseSettings):
     RAG_MAX_CONTEXT_CHARS: int = 30000
     RAG_MAX_OUTPUT_TOKENS: int = 2000
 
-    AZURE_SEARCH_MAX_CONCURRENCY: int = 8
-    AZURE_SEARCH_QUEUE_TIMEOUT_SECONDS: float = 20.0
+    # Initial PoC load profile for up to 100 in-flight chat requests.
+    # Search, embedding and chat use separate queues so one dependency does
+    # not reserve capacity while it is still waiting for another dependency.
+    AZURE_SEARCH_MAX_CONCURRENCY: int = 20
+    AZURE_SEARCH_QUEUE_TIMEOUT_SECONDS: float = 30.0
     AZURE_SEARCH_REQUEST_TIMEOUT_SECONDS: float = 15.0
 
-    AZURE_OPENAI_CHAT_MAX_CONCURRENCY: int = 6
+    AZURE_OPENAI_CHAT_MAX_CONCURRENCY: int = 12
     AZURE_OPENAI_CHAT_QUEUE_TIMEOUT_SECONDS: float = 30.0
     AZURE_OPENAI_CHAT_REQUEST_TIMEOUT_SECONDS: float = 90.0
-    AZURE_OPENAI_EMBEDDING_MAX_CONCURRENCY: int = 8
+    AZURE_OPENAI_EMBEDDING_MAX_CONCURRENCY: int = 12
     AZURE_OPENAI_EMBEDDING_QUEUE_TIMEOUT_SECONDS: float = 20.0
     AZURE_OPENAI_EMBEDDING_REQUEST_TIMEOUT_SECONDS: float = 20.0
     AZURE_OPENAI_GENERATE_MAX_TOKENS: int = 1000
